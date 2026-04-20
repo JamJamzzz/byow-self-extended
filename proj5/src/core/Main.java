@@ -8,20 +8,20 @@ import java.awt.*;
 
 public class Main {
     private static final int WIDTH = 80;
-    private static final int HEIGHT = 60;
+    private static final int HEIGHT = 40;
 
     public static void main(String[] args) {
         TERenderer ter = new TERenderer();
         ter.initialize(WIDTH, HEIGHT);
 
-        long seed = 1637079600780352519L;
+        long seed = 2148924051058622185L;
 
 
         World world = new World(
                 WIDTH,
                 HEIGHT,
+                4,
                 5,
-                7,
                 seed
         );
 

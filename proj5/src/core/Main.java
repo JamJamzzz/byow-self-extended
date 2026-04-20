@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class Main {
     private static final int WIDTH = 80;
-    private static final int HEIGHT = 50;
+    private static final int HEIGHT = 40;
 
     public static void main(String[] args) {
         TERenderer ter = new TERenderer();
@@ -21,7 +21,7 @@ public class Main {
                 WIDTH,
                 HEIGHT,
                 5,
-                6,
+                7,
                 seed
         );
 

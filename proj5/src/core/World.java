@@ -15,8 +15,8 @@ public class World {
 
     private final int MIN_ROOM_W = 4;
     private final int MAX_ROOM_W = 8;
-    private final int MIN_ROOM_H = 2;
-    private final int MAX_ROOM_H = 6;
+    private final int MIN_ROOM_H = 3;
+    private final int MAX_ROOM_H = 7;
 
     private final int MIN_ROOM_NUM = 2;
     private final int MAX_ROOM_NUM = 4;

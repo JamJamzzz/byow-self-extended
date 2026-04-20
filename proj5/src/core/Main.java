@@ -14,7 +14,7 @@ public class Main {
         TERenderer ter = new TERenderer();
         ter.initialize(WIDTH, HEIGHT);
 
-        long seed = 4303427370161638680L;
+        long seed = 7760575586436919462L;
 
 
         World world = new World(

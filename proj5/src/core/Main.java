@@ -20,8 +20,8 @@ public class Main {
         World world = new World(
                 WIDTH,
                 HEIGHT,
+                3,
                 4,
-                5,
                 seed
         );
 

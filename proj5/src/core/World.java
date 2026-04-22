@@ -13,13 +13,13 @@ public class World {
     private final int CHUNK_ROWS;
     private final int CHUNK_COLS;
 
-    private final int MIN_ROOM_W = 4;
-    private final int MAX_ROOM_W = 8;
-    private final int MIN_ROOM_H = 4;
-    private final int MAX_ROOM_H = 8;
+    private final int MIN_ROOM_W = 5;
+    private final int MAX_ROOM_W = 12;
+    private final int MIN_ROOM_H = 5;
+    private final int MAX_ROOM_H = 12;
 
-    private final int MIN_ROOM_NUM = 2;
-    private final int MAX_ROOM_NUM = 4;
+    private final int MIN_ROOM_NUM = 1;
+    private final int MAX_ROOM_NUM = 3;
 
     private final Random random;
 

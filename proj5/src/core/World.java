@@ -32,39 +32,6 @@ public class World {
     private List<Room> allRooms;
     private final int[][] wallDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}, {-1,-1}, {-1,1}, {1,-1}, {1,1}};
     private final int[][] chunkDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
-    
-    /** Inner Class **/
-    private class Room {
-        int x;
-        int y;
-        int w;
-        int h;
-
-        int centerAtX() {
-            return x + w / 2;
-        }
-
-        int centerAtY() {
-            return y + h / 2;
-        }
-    }
-
-    private class Chunk {
-        int x, y, w, h;
-
-        List<Room> rooms;
-        List<Chunk> siblings;
-    }
-    
-    private class Edge {
-        Room a;
-        Room b;
-        
-        Edge(Room a, Room b) {
-            this.a = a;
-            this.b = b;
-        }
-    }
 
     /** Constructor **/
     public World(int width, int height, int chunkRows, int chunkCols, long seed) {
@@ -354,8 +321,8 @@ public class World {
     }
 
     private void addWalls() {
-        for (int x = 1; x < WIDTH - 1; x++) {
-            for (int y = 1; y < HEIGHT - 1; y++) {
+        for (int x = 0; x < WIDTH - 1; x++) {
+            for (int y = 0; y < HEIGHT - 1; y++) {
                 if (grid[x][y] == Tileset.NOTHING) {
                     //Use a helper method to detect whether there're floor besides it or not
                     if (hasFloorBeside(x, y)) {
@@ -408,17 +375,17 @@ public class World {
 //            }
 //        }
         //Fixing the bottom
-        for (int x = 0; x < WIDTH; x++) {
-            if (grid[x][1] == Tileset.FLOOR) {
-                grid[x][1] = Tileset.WALL;
-            }
-        }
-        //Fixing the left
-        for (int y = 0; y < HEIGHT; y++) {
-            if (grid[1][y] == Tileset.FLOOR) {
-                grid[1][y] = Tileset.WALL;
-            }
-        }
+//        for (int x = 0; x < WIDTH; x++) {
+//            if (grid[x][1] == Tileset.FLOOR) {
+//                grid[x][1] = Tileset.WALL;
+//            }
+//        }
+//        //Fixing the left
+//        for (int y = 0; y < HEIGHT; y++) {
+//            if (grid[1][y] == Tileset.FLOOR) {
+//                grid[1][y] = Tileset.WALL;
+//            }
+//        }
     }
 
     public TETile[][] getGrid() {

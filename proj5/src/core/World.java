@@ -23,6 +23,8 @@ public class World {
 
     private final Random random;
 
+    private final long seed;
+
     /** Grid **/
     private TETile[][] grid;
     
@@ -32,6 +34,7 @@ public class World {
     private List<Room> allRooms;
     private final int[][] wallDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}, {-1,-1}, {-1,1}, {1,-1}, {1,1}};
     private final int[][] chunkDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
+    private final Player player;
 
     /** Constructor **/
     public World(int width, int height, int chunkRows, int chunkCols, long seed) {
@@ -50,6 +53,9 @@ public class World {
         this.CHUNK_ROWS = Math.max(2, Math.min(chunkRows, HEIGHT / minChunkHeight));
 
         this.random = new Random(seed);
+
+        player = new Player();
+        this.seed = seed;
 
         initializeGrid();
 
@@ -390,5 +396,13 @@ public class World {
 
     public TETile[][] getGrid() {
         return grid;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public long getSeed() {
+        return seed;
     }
 }

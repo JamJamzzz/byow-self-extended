@@ -1,11 +1,13 @@
 package core;
 
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Out;
 import edu.princeton.cs.algs4.StdDraw;
-import net.sf.saxon.expr.Component;
 import tileengine.TERenderer;
 import tileengine.TETile;
 
 import java.awt.*;
+import java.io.File;
 
 public class Main {
     /** World Parameters **/
@@ -15,6 +17,9 @@ public class Main {
     private static final int CHUNK_COLS = 4;
 
     private static final int HUD_HEIGHT = 2;
+
+    /** World Record **/
+    private static StringBuilder inputHistory;
 
     public static void main(String[] args) {
        showMenu();
@@ -36,6 +41,8 @@ public class Main {
                     break;
                 } else if (key == 'l') {
                     IO.print("Load Game");
+                    String history = loadGame();
+                    replayGame(history);
                     break;
                 } else if (key == 'q') {
                     IO.print("Quit Game");
@@ -110,6 +117,50 @@ public class Main {
     }
 
     private static void startGame(long seed) {
+        //Generate the World
+        World world = new World(
+                WIDTH,
+                HEIGHT,
+                CHUNK_ROWS,
+                CHUNK_COLS,
+                seed
+        );
+
+        //Initializing the history with seed
+        inputHistory = new StringBuilder();
+        inputHistory.append("n").append(seed).append("s");
+
+        //Initializing the render
+        TERenderer ter = new TERenderer();
+        ter.initialize(WIDTH,HEIGHT + HUD_HEIGHT);
+
+        gameLoop(world, ter);
+    }
+
+    private static void saveGame(String history) {
+        Out out = new Out("save.txt");
+        out.println(history);
+        out.close();
+    }
+
+    private static String loadGame() {
+        String fileName = "save.txt";
+        File file = new File(fileName);
+
+        if (file.exists()) {
+            In in = new In(file);
+            if (in.hasNextLine()) {
+                return in.readLine();
+            }
+        }
+
+        //No save history
+        return "";
+    }
+
+    private static void replayGame(String history) {
+        long seed = extractSeedFromHistory(history);
+
         TERenderer ter = new TERenderer();
 
         ter.initialize(WIDTH,HEIGHT + HUD_HEIGHT);
@@ -122,16 +173,87 @@ public class Main {
                 seed
         );
 
-        Player player = new Player();
+        boolean startReply = false;
 
+        for (char c : history.toCharArray()) {
+            //Skip the seed part
+            if (c == 's') {
+                startReply = true;
+                continue;
+            }
+
+            if (startReply) {
+                applyMovement(world.getPlayer(), world, c);
+            }
+        }
+
+        startGameFromReload(world, ter, history);
+    }
+
+    private static long extractSeedFromHistory(String history) {
+        StringBuilder sb = new StringBuilder();
+
+        for (char c : history.toCharArray()) {
+            if (Character.isDigit(c)) {
+                sb.append(c);
+            } else if (c == 's') {
+                break;
+            }
+        }
+
+        return Long.parseLong(sb.toString());
+    }
+
+    //Implement for task2
+    /**
+     *
+     * @param player add a spawn player function in World class,
+     *               should be called in the constructor
+     * @param world
+     * @param move only deal with wasd/WASD, make sure that the player wouldn't be stuck in the wall
+     * Updating the player location by draw the avatar in the tiles
+     */
+    private static void applyMovement(Player player, World world, char move) {
+
+    }
+
+    private static void startGameFromReload(World world, TERenderer ter, String history) {
+        inputHistory = new StringBuilder(history);
+        gameLoop(world, ter);
+    }
+
+    private static void gameLoop(World world, TERenderer ter) {
+        Player player = world.getPlayer();
         TETile[][] tiles = world.getGrid();
 
+        char key;
+        boolean waitForNextQ = false;
+
         while (true) {
+            //Game loop start here
+            if (StdDraw.hasNextKeyTyped()) {
+                key = Character.toLowerCase(StdDraw.nextKeyTyped());
+
+                inputHistory.append(key);
+
+                //Task 2 here:
+                applyMovement(player, world, key);
+
+                if (key == ':') {
+                    waitForNextQ = true;
+                } else if (waitForNextQ && (key == 'q' || key == 'Q')) {
+                    saveGame(inputHistory.toString());
+                    System.exit(0);
+                } else {
+                    waitForNextQ = false;
+                }
+            }
+
+            //Draw the world
             ter.drawTiles(tiles);
 
+            //Draw HUD
             drawHUD(tiles, player);
-
-            //Implement task2 interactivity
 
             StdDraw.show();
         }
@@ -164,7 +286,6 @@ public class Main {
 
     private static void drawPlayerStatus(Player player) {
         drawHearts(player);
-
         //Ambitious Features:
     }
 

@@ -15,16 +15,11 @@ public class Player {
     private int MaxHP;
     private int health;
     private TETile avator;
-    private Queue<Character> movement;
-    private Queue<Character> operation;
 
     public Player() {
         health = 3;
         MaxHP = 5;
         avator = Tileset.AVATAR;
-
-        movement = new LinkedList<>();
-        operation = new LinkedList<>();
     }
 
     public int getHealth() {

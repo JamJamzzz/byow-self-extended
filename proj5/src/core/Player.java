@@ -17,8 +17,7 @@ public class Player {
     private TETile avator;
 
     /** Player Location **/
-    private int x;
-    private int y;
+    private Position position;
 
     public Player() {
         health = 3;
@@ -32,6 +31,10 @@ public class Player {
 
     public int getMaxHP() {
         return MaxHP;
+    }
+
+    public Position getPosition() {
+        return position;
     }
 
     //Ambitious Features:

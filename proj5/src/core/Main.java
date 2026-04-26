@@ -7,10 +7,14 @@ import tileengine.TERenderer;
 import tileengine.TETile;
 
 import java.awt.*;
+import java.util.*;
 import java.io.File;
+import java.util.List;
 
 public class Main {
-    /** World Parameters **/
+    /**
+     * World Parameters
+     **/
     private static final int WIDTH = 80;
     private static final int HEIGHT = 60;
     private static final int CHUNK_ROWS = 4;
@@ -18,11 +22,13 @@ public class Main {
 
     private static final int HUD_HEIGHT = 2;
 
-    /** World Record **/
+    /**
+     * World Record
+     **/
     private static StringBuilder inputHistory;
 
     public static void main(String[] args) {
-       showMenu();
+        showMenu();
     }
 
     private static void showMenu() {
@@ -132,7 +138,7 @@ public class Main {
 
         //Initializing the render
         TERenderer ter = new TERenderer();
-        ter.initialize(WIDTH,HEIGHT + HUD_HEIGHT);
+        ter.initialize(WIDTH, HEIGHT + HUD_HEIGHT);
 
         gameLoop(world, ter);
     }
@@ -163,7 +169,7 @@ public class Main {
 
         TERenderer ter = new TERenderer();
 
-        ter.initialize(WIDTH,HEIGHT + HUD_HEIGHT);
+        ter.initialize(WIDTH, HEIGHT + HUD_HEIGHT);
 
         World world = new World(
                 WIDTH,
@@ -205,16 +211,21 @@ public class Main {
     }
 
     //Implement for task2
+
     /**
      *
      * @param player add a spawn player function in World class,
      *               should be called in the constructor
      * @param world
-     * @param move only deal with wasd/WASD, make sure that the player wouldn't be stuck in the wall
-     * Updating the player location by draw the avatar in the tiles
+     * @param move   only deal with wasd/WASD, make sure that the player wouldn't be stuck in the wall
+     *               Updating the player location by draw the avatar in the tiles
      */
     private static void applyMovement(Player player, World world, char move) {
 
+    }
+
+    private static boolean isWalkable(World world, Position next) {
+        return true;
     }
 
     private static void startGameFromReload(World world, TERenderer ter, String history) {
@@ -230,7 +241,7 @@ public class Main {
         boolean waitForNextQ = false;
 
         while (true) {
-            //Game loop start here
+            //WASD
             if (StdDraw.hasNextKeyTyped()) {
                 key = Character.toLowerCase(StdDraw.nextKeyTyped());
 
@@ -248,6 +259,9 @@ public class Main {
                     waitForNextQ = false;
                 }
             }
+
+            //Implement task 5 here
+            //Mouse Click
 
             //Draw the world
             ter.drawTiles(tiles);
@@ -305,5 +319,53 @@ public class Main {
 
             StdDraw.textLeft(startX + i * 1.2, y, "❤");
         }
+    }
+
+    private static List<Position> findPathBFS (World world, Position start, Position end) {
+        Queue<Position> queue = new LinkedList<>();
+        Map<Position, Position> parent = new HashMap<>();
+        Set<Position> visited = new HashSet<>();
+
+        queue.add(start);
+        visited.add(start);
+
+        while (!queue.isEmpty()) {
+            Position cur = queue.poll();
+
+            if (cur.equals(end)) {
+                break;
+            }
+
+            for (Position next : getNeighbors(cur)) {
+                if (!visited.contains(next) && isWalkable(world, next)) {
+                    queue.add(next);
+                    visited.add(next);
+                    parent.put(next, cur);
+                }
+            }
+        }
+
+        return findShortestPath(parent, start, end);
+    }
+
+    /** Implement for task 5 **/
+    private static List<Position> getNeighbors(Position current) {
+        return new ArrayList<>();
+    }
+
+    private static List<Position> findShortestPath(Map<Position, Position> parent, Position start, Position end) {
+        return new ArrayList<>();
+    }
+
+    private static void followPath(Player player, World world, List<Position> path) {
+        ;
+    }
+
+    private static void drawPath(List<Position> path) {
+        ;
+    }
+
+    private static boolean isPath(World world, Position start, Position end) {
+        return false;
     }
 }

@@ -6,7 +6,7 @@ import tileengine.Tileset;
 import java.util.LinkedList;
 import java.util.Queue;
 
-/** Default Play **/
+/** Default Player **/
 public class Player {
     /** Class Attributes **/
     private final int MAX_HP = 10;
@@ -15,6 +15,10 @@ public class Player {
     private int MaxHP;
     private int health;
     private TETile avator;
+
+    /** Player Location **/
+    private int x;
+    private int y;
 
     public Player() {
         health = 3;

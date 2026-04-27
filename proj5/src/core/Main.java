@@ -417,25 +417,20 @@ public class Main {
                 Position mouse = new Position(x, y);
 
                 if (!isWalkable(world, mouse)){
-                    clearPath(world, path);
                     path = null;
                     target = null;
                 } else {
                     if (target == null) {
                         List<Position> newPath = findPathBFS(world, world.getPlayer().getPosition(), mouse);
                         if (newPath != null && !newPath.isEmpty()) {
-                            clearPath(world, path);
                             path = newPath;
                             target = mouse;
-
-                            drawPath(world, path);
                         }
                     } else if (mouse.equals(target)) {
                         ter.drawTiles(world.getGrid());
                         StdDraw.show();
 
                         followPath(player, world, path, ter);
-                        clearPath(world, path);
                         path = null;
                         target = null;
                     } else {
@@ -443,11 +438,8 @@ public class Main {
                                 findPathBFS(world, player.getPosition(), mouse);
 
                         if (newPath != null && !newPath.isEmpty()) {
-                            clearPath(world, path);
                             path = newPath;
                             target = mouse;
-
-                            drawPath(world, path);
                         }
                     }
                 }
@@ -459,6 +451,9 @@ public class Main {
 
             //Draw HUD
             drawHUD(tiles, player);
+
+            //Draw the overlay path
+            drawPathOverlay(path);
 
             StdDraw.show();
         }
@@ -594,17 +589,28 @@ public class Main {
             char move = getMove(oldStep, nextStep);
             inputHistory.append(move);
 
-            grid[oldStep.x][oldStep.y] = Tileset.FLOOR;
+            grid[oldStep.x][oldStep.y] = player.getStandingOn();
+            TETile nextTile = grid[nextStep.x][nextStep.y];
+            player.setStandingOn(nextTile);
+            if (nextTile == Tileset.ENEMY) {
+                player.deductHealth(1);
+                // 可选：踩死敌人
+                player.setStandingOn(Tileset.FLOOR);
+            }
 
-            //Update the current position
-            player.setPosition(nextStep);
+            if (nextTile == Tileset.TRAP) {
+                player.deductHealth(1);
+            }
 
             //Place the new position
             grid[nextStep.x][nextStep.y] = player.getAvator();
+            //Update the current position
+            player.setPosition(nextStep);
 
             ter.drawTiles(grid);
             StdDraw.show();
         }
+        player.setStandingOn(Tileset.FLOOR);
     }
 
     private static char getMove(Position from, Position to) {
@@ -615,32 +621,39 @@ public class Main {
 
         throw new IllegalArgumentException("Invalid move");
     }
-
-    private static void drawPath(World world, List<Position> path) {
-        if (path == null) {
-            return;
-        }
-
-        TETile[][] grid = world.getGrid();
+    private static void drawPathOverlay(List<Position> path) {
+        if (path == null) return;
 
         for (Position p : path) {
-            if (!grid[p.x][p.y].equals(Tileset.AVATAR)) {
-                grid[p.x][p.y] = Tileset.GRASS;
-            }
+            Tileset.GRASS.draw(p.x, p.y);
         }
     }
 
-    private static void clearPath(World world, List<Position> path) {
-        if (path == null) {
-            return;
-        }
-
-        TETile[][] grid = world.getGrid();
-
-        for (Position p : path) {
-            if (grid[p.x][p.y].equals(Tileset.GRASS)) {
-                grid[p.x][p.y] = Tileset.FLOOR;
-            }
-        }
-    }
+//    private static void drawPath(World world, List<Position> path) {
+//        if (path == null) {
+//            return;
+//        }
+//
+//        TETile[][] grid = world.getGrid();
+//
+//        for (Position p : path) {
+//            if (!grid[p.x][p.y].equals(Tileset.AVATAR)) {
+//                grid[p.x][p.y] = Tileset.GRASS;
+//            }
+//        }
+//    }
+//
+//    private static void clearPath(World world, List<Position> path) {
+//        if (path == null) {
+//            return;
+//        }
+//
+//        TETile[][] grid = world.getGrid();
+//
+//        for (Position p : path) {
+//            if (grid[p.x][p.y].equals(Tileset.GRASS)) {
+//                grid[p.x][p.y] = Tileset.FLOOR;
+//            }
+//        }
+//    }
 }

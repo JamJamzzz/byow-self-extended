@@ -321,9 +321,10 @@ public class Main {
         }
 
         if (nextTile == Tileset.FLOWER) {
-            // heal the player when they walk onto a flower
+            System.out.println("Before heal: " + player.getHealth());
             HealingItem heal = new HealingItem(1);
             heal.interact(player);
+            System.out.println("After heal: " + player.getHealth());
             player.setStandingOn(Tileset.FLOOR);
         }
 

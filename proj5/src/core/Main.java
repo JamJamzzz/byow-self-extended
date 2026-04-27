@@ -49,6 +49,10 @@ public class Main {
                 } else if (key == 'l') {
                     IO.print("Load Game");
                     String history = loadGame();
+                    if (history == null || history.isEmpty()) {
+                        draw();
+                        continue;
+                    }
                     replayGame(history);
                     break;
                 } else if (key == 'q') {
@@ -95,9 +99,14 @@ public class Main {
                 char ch = StdDraw.nextKeyTyped();
 
                 if (Character.isDigit(ch)) {
-                    seedStr.append(ch);
+                    if (seedStr.length() < 18) {
+                        seedStr.append(ch);
+                    }
                     drawSeed(seedStr.toString());
                 } else if (ch == 's' || ch == 'S') {
+                    if (seedStr.length() == 0) {
+                        continue;
+                    }
                     break;
                 }
             }
@@ -184,18 +193,12 @@ public class Main {
 
         world.placePlayer();
 
-        boolean startReply = false;
+        int start = history.indexOf('s') + 1;
 
-        for (char c : history.toCharArray()) {
-            //Skip the seed part
-            if (c == 's') {
-                startReply = true;
-                continue;
-            }
+        for (int i = start; i < history.length(); i++) {
+            char c = history.charAt(i);
 
-            if (startReply) {
-                applyMovement(world.getPlayer(), world, c);
-            }
+            applyMovement(world.getPlayer(), world, c);
         }
 
         startGameFromReload(world, ter, history);
@@ -285,6 +288,7 @@ public class Main {
         //Mouse Click
         List<Position> path = null;
         boolean mousePressed = false;
+        Position target = null;
 
         while (true) {
             //WASD
@@ -306,7 +310,6 @@ public class Main {
                 }
             }
 
-            //Implement task 5 here
             //Mouse Click
             boolean mousePressedCur = StdDraw.isMousePressed();
             //Only trigger once
@@ -318,18 +321,37 @@ public class Main {
 
                 if (!isWalkable(world, mouse)){
                     clearPath(world, path);
+                    path = null;
+                    target = null;
                 } else {
-                    List<Position> newPath = findPathBFS(world, world.getPlayer().getPosition(), mouse);
-                    if (newPath != null && !newPath.isEmpty()) {
-                        clearPath(world, path);
-                        path = newPath;
+                    if (target == null) {
+                        List<Position> newPath = findPathBFS(world, world.getPlayer().getPosition(), mouse);
+                        if (newPath != null && !newPath.isEmpty()) {
+                            clearPath(world, path);
+                            path = newPath;
+                            target = mouse;
 
-                        drawPath(world, path);
+                            drawPath(world, path);
+                        }
+                    } else if (mouse.equals(target)) {
                         ter.drawTiles(world.getGrid());
                         StdDraw.show();
 
                         followPath(player, world, path, ter);
                         clearPath(world, path);
+                        path = null;
+                        target = null;
+                    } else {
+                        List<Position> newPath =
+                                findPathBFS(world, player.getPosition(), mouse);
+
+                        if (newPath != null && !newPath.isEmpty()) {
+                            clearPath(world, path);
+                            path = newPath;
+                            target = mouse;
+
+                            drawPath(world, path);
+                        }
                     }
                 }
             }
@@ -460,6 +482,10 @@ public class Main {
         for (Position nextStep : path) {
             //Clear the old position
             Position oldStep = player.getPosition();
+
+            char move = getMove(oldStep, nextStep);
+            inputHistory.append(move);
+
             grid[oldStep.x][oldStep.y] = Tileset.FLOOR;
 
             //Update the current position
@@ -471,6 +497,15 @@ public class Main {
             ter.drawTiles(grid);
             StdDraw.show();
         }
+    }
+
+    private static char getMove(Position from, Position to) {
+        if (to.x == from.x + 1 && to.y == from.y) return 'd';
+        if (to.x == from.x - 1 && to.y == from.y) return 'a';
+        if (to.x == from.x && to.y == from.y + 1) return 'w';
+        if (to.x == from.x && to.y == from.y - 1) return 's';
+
+        throw new IllegalArgumentException("Invalid move");
     }
 
     private static void drawPath(World world, List<Position> path) {

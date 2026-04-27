@@ -11,7 +11,7 @@ public class Position {
 
     @Override
     public boolean equals(Object other) {
-        if (this == o) {
+        if (this == other) {
             return true;
         }
 

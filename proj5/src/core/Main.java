@@ -5,6 +5,7 @@ import edu.princeton.cs.algs4.Out;
 import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TERenderer;
 import tileengine.TETile;
+import tileengine.Tileset;
 
 import java.awt.*;
 import java.util.*;
@@ -225,6 +226,17 @@ public class Main {
     }
 
     private static boolean isWalkable(World world, Position next) {
+        int x = next.x;
+        int y = next.y;
+
+        if (x < 0 || x >= world.getGrid().length || y < 0 || y >= world.getGrid()[0].length) {
+            return false;
+        }
+
+        if (world.getGrid()[x][y] == Tileset.NOTHING || world.getGrid()[x][y] == Tileset.WALL) {
+            return false;
+        }
+
         return true;
     }
 
@@ -237,8 +249,13 @@ public class Main {
         Player player = world.getPlayer();
         TETile[][] tiles = world.getGrid();
 
+        //Key Board
         char key;
         boolean waitForNextQ = false;
+
+        //Mouse Click
+        List<Position> path = null;
+        boolean mousePressed = false;
 
         while (true) {
             //WASD
@@ -262,6 +279,32 @@ public class Main {
 
             //Implement task 5 here
             //Mouse Click
+            boolean mousePressedCur = StdDraw.isMousePressed();
+            //Only trigger once
+            if (mousePressedCur && !mousePressed) {
+                int x = (int) StdDraw.mouseX();
+                int y = (int) StdDraw.mouseY();
+
+                Position mouse = new Position(x, y);
+
+                if (!isWalkable(world, mouse)){
+                    clearPath(world, path);
+                } else {
+                    List<Position> newPath = findPathBFS(world, world.getPlayer().getPosition(), mouse);
+                    if (newPath != null && !newPath.isEmpty()) {
+                        clearPath(world, path);
+                        path = newPath;
+
+                        drawPath(world, path);
+                        ter.drawTiles(world.getGrid());
+                        StdDraw.show();
+
+                        followPath(player, world, path, ter);
+                        clearPath(world, path);
+                    }
+                }
+            }
+            mousePressed = mousePressedCur;
 
             //Draw the world
             ter.drawTiles(tiles);
@@ -348,24 +391,84 @@ public class Main {
         return findShortestPath(parent, start, end);
     }
 
-    /** Implement for task 5 **/
     private static List<Position> getNeighbors(Position current) {
-        return new ArrayList<>();
+        List<Position> result = new ArrayList<>();
+
+        result.add(new Position(current.x + 1, current.y));
+        result.add(new Position(current.x - 1, current.y));
+        result.add(new Position(current.x, current.y + 1));
+        result.add(new Position(current.x, current.y - 1));
+
+        return result;
     }
 
     private static List<Position> findShortestPath(Map<Position, Position> parent, Position start, Position end) {
-        return new ArrayList<>();
+        List<Position> path = new ArrayList<>();
+
+        if (!parent.containsKey(end)) {
+            return null;
+        }
+
+        Position cur = end;
+
+        while (!cur.equals(start)) {
+            path.add(cur);
+            cur = parent.get(cur);
+        }
+
+        Collections.reverse(path);
+
+        return path;
     }
 
-    private static void followPath(Player player, World world, List<Position> path) {
-        ;
+    private static void followPath(Player player, World world, List<Position> path, TERenderer ter) {
+        if(path == null) {
+            return;
+        }
+
+        TETile[][] grid = world.getGrid();
+
+        for (Position nextStep : path) {
+            //Clear the old position
+            Position oldStep = player.getPosition();
+            grid[oldStep.x][oldStep.y] = Tileset.FLOOR;
+
+            //Update the current position
+            player.setPosition(nextStep);
+
+            //Place the new position
+            grid[nextStep.x][nextStep.y] = player.getAvator();
+
+            ter.drawTiles(grid);
+            StdDraw.show();
+        }
     }
 
-    private static void drawPath(List<Position> path) {
-        ;
+    private static void drawPath(World world, List<Position> path) {
+        if (path == null) {
+            return;
+        }
+
+        TETile[][] grid = world.getGrid();
+
+        for (Position p : path) {
+            if (!grid[p.x][p.y].equals(Tileset.AVATAR)) {
+                grid[p.x][p.y] = Tileset.GRASS;
+            }
+        }
     }
 
-    private static boolean isPath(World world, Position start, Position end) {
-        return false;
+    private static void clearPath(World world, List<Position> path) {
+        if (path == null) {
+            return;
+        }
+
+        TETile[][] grid = world.getGrid();
+
+        for (Position p : path) {
+            if (grid[p.x][p.y].equals(Tileset.GRASS)) {
+                grid[p.x][p.y] = Tileset.FLOOR;
+            }
+        }
     }
 }

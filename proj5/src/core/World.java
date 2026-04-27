@@ -443,6 +443,34 @@ public class World {
         }
     }
 
+    public void placeHealingItems() {
+        for (Room room : allRooms) {
+            if (random.nextBoolean()) {
+                int x = random.nextInt(room.w - 2) + room.x + 1;
+                int y = random.nextInt(room.h - 2) + room.y + 1;
+
+                if (grid[x][y] == Tileset.FLOOR) {
+                    grid[x][y] = Tileset.FLOWER;
+                }
+            }
+        }
+    }
+
+    public void placeCoins() {
+        for (Room room : allRooms) {
+            int coinCount = random.nextInt(3) + 1;
+
+            for (int i = 0; i < coinCount; i++) {
+                int x = random.nextInt(room.w - 2) + room.x + 1;
+                int y = random.nextInt(room.h - 2) + room.y + 1;
+
+                if (grid[x][y] == Tileset.FLOOR) {
+                    grid[x][y] = Tileset.UNLOCKED_DOOR;
+                }
+            }
+        }
+    }
+
     private boolean inBounds(int x, int y) {
         return x >= 0 && x < grid.length &&
                 y >= 0 && y < grid[0].length;

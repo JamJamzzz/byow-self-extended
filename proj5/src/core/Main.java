@@ -145,6 +145,8 @@ public class Main {
         world.placePlayer();
         world.placeEnemy();
         world.placeTrap();
+        world.placeHealingItems();
+        world.placeCoins();
 
         //Initializing the history with seed
         inputHistory = new StringBuilder();
@@ -196,6 +198,8 @@ public class Main {
         world.placePlayer();
         world.placeEnemy();
         world.placeTrap();
+        world.placeHealingItems();
+        world.placeCoins();
 
         int start = history.indexOf('s') + 1;
 
@@ -314,6 +318,20 @@ public class Main {
         if (nextTile == Tileset.TRAP) {
             player.deductHealth(1);
             player.setStandingOn(Tileset.TRAP);
+        }
+
+        if (nextTile == Tileset.FLOWER) {
+            // heal the player when they walk onto a flower
+            HealingItem heal = new HealingItem(1);
+            heal.interact(player);
+            player.setStandingOn(Tileset.FLOOR);
+        }
+
+        if (nextTile == Tileset.UNLOCKED_DOOR) {
+            // collect the coin when they walk onto it
+            Coin coin = new Coin(1);
+            coin.interact(player);
+            player.setStandingOn(Tileset.FLOOR);
         }
 
         world.getGrid()[newX][newY] = player.getAvator();
@@ -483,6 +501,10 @@ public class Main {
         //Display the status of player
         drawPlayerStatus(player);
 
+        // Display coin
+        StdDraw.setPenColor(Color.YELLOW);
+        StdDraw.textLeft(WIDTH - 20, HEIGHT + HUD_HEIGHT - 1, "Coins: " + player.getMoney());
+
         //Get the location of the cursor
         int x = (int) StdDraw.mouseX();
         int y = (int) StdDraw.mouseY();
@@ -600,6 +622,18 @@ public class Main {
 
             if (nextTile == Tileset.TRAP) {
                 player.deductHealth(1);
+            }
+
+            if (nextTile == Tileset.FLOWER) {
+                HealingItem heal = new HealingItem(1);
+                heal.interact(player);
+                player.setStandingOn(Tileset.FLOOR);
+            }
+
+            if (nextTile == Tileset.UNLOCKED_DOOR) {
+                Coin coin = new Coin(1);
+                coin.interact(player);
+                player.setStandingOn(Tileset.FLOOR);
             }
 
             //Place the new position

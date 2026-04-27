@@ -12,6 +12,7 @@ public class Player {
     private final int MAX_HP = 10;
 
     /** Player Attributes **/
+    private int money;
     private int MaxHP;
     private int health;
     private TETile avator;
@@ -81,6 +82,18 @@ public class Player {
             case RIGHT: return Tileset.ATTACK_RIGHT;
         }
         return Tileset.CELL; // fallback
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void addMoney(int amount) {
+        money += amount;
     }
 
     public TETile getStandingOn() {

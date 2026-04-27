@@ -60,10 +60,8 @@ public class World {
 
         initializeGrid();
 
-        generateChunks();
-        generateRoomsInChunks();
-
-        connectChunks();
+        generateRooms();
+        connectRooms();
 
         renderRooms();
         renderHallWays();
@@ -139,66 +137,67 @@ public class World {
         }
     }
 
-    private void generateRoomsInChunks() {
-        //Generate rooms for each chunks
-        //Get the next num in the fixed series based on seed, which is the key of pseudorandom
-
+    private void generateRooms() {
         allRooms = new ArrayList<>();
 
-        for (Chunk chunk : chunks) {
-            int maxW = Math.min(MAX_ROOM_W, chunk.w - 2);
-            int maxH = Math.min(MAX_ROOM_H, chunk.h - 2);
-            //Just skip this chunk if the chunk is way too small
-            if (maxW < MIN_ROOM_W || maxH < MIN_ROOM_H) {
-                continue;
-            }
+        int targetRooms = random.nextInt(6) + 8;
+        int attempts = 0;
 
-            //Pseudorandomly generate the room num
-            int roomNum = random.nextInt(MAX_ROOM_NUM - MIN_ROOM_NUM + 1) + MIN_ROOM_NUM;
+        while (allRooms.size() < targetRooms && attempts < 200) {
+            attempts++;
 
-            for (int i = 0; i < roomNum; i++) {
-                //Generate the width and height of the room
-                int roomW = random.nextInt(maxW -MIN_ROOM_W + 1) + MIN_ROOM_W;
-                int roomH = random.nextInt(maxH - MIN_ROOM_H + 1) + MIN_ROOM_H;
+            int roomW = random.nextInt(MAX_ROOM_W - MIN_ROOM_W + 1) + MIN_ROOM_W;
+            int roomH = random.nextInt(MAX_ROOM_H - MIN_ROOM_H + 1) + MIN_ROOM_H;
 
-                //The location of the room, make sure they didnt touch the edges
-                int xRange = chunk.w - roomW - 2;
-                int yRange = chunk.h - roomH - 2;
+            int x = random.nextInt(WIDTH - roomW - 2) + 1;
+            int y = random.nextInt(HEIGHT - roomH - 2) + 1;
 
-                if (xRange <= 0 || yRange <= 0) {
-                    continue;
-                }
-                int x = chunk.x + random.nextInt(xRange) + 1;
-                int y = chunk.y + random.nextInt(yRange) + 1;
+            Room room = new Room();
+            room.x = x;
+            room.y = y;
+            room.w = roomW;
+            room.h = roomH;
 
-                //Create a new room
-                Room room = new Room();
-                room.x = x;
-                room.y = y;
-                room.w = roomW;
-                room.h = roomH;
-
-                chunk.rooms.add(room);
+            if (!overlapsExisting(room)) {
                 allRooms.add(room);
             }
         }
     }
 
-    private void connectRoomsInChunk(Chunk chunk) {
-        List<Room> rooms = chunk.rooms;
+    private boolean overlapsExisting(Room newRoom) {
+        for (Room existing : allRooms) {
+            boolean xOverlap = newRoom.x < existing.x + existing.w + 1
+                    && newRoom.x + newRoom.w + 1 > existing.x;
+            boolean yOverlap = newRoom.y < existing.y + existing.h + 1
+                    && newRoom.y + newRoom.h + 1 > existing.y;
 
-        if (rooms.size() <= 1) {
+            if (xOverlap && yOverlap) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void connectRooms() {
+        edges = new ArrayList<>();
+
+        if (allRooms.size() <= 1) {
             return;
         }
 
-        for (int i = 0; i < rooms.size() - 1; i++) {
-            Room a = rooms.get(i);
-            Room b = rooms.get(i + 1);
+        for (int i = 0; i < allRooms.size() - 1; i++) {
+            edges.add(new Edge(allRooms.get(i), allRooms.get(i + 1)));
+        }
 
-            edges.add(new Edge(a, b));
+        int extras = random.nextInt(4) + 2;
+        for (int i = 0; i < extras; i++) {
+            Room a = allRooms.get(random.nextInt(allRooms.size()));
+            Room b = allRooms.get(random.nextInt(allRooms.size()));
+            if (a != b && !isDuplicateConnection(a, b)) {
+                edges.add(new Edge(a, b));
+            }
         }
     }
-
 
     private void connectChunks() {
         edges = new ArrayList<>();
@@ -396,23 +395,7 @@ public class World {
     }
 
     public void placePlayer() {
-        Chunk topLeftChunk = null;
-        for (Chunk chunk : chunks) {
-            if (topLeftChunk == null) {
-                topLeftChunk = chunk;
-            } else if (chunk.y > topLeftChunk.y) {
-                topLeftChunk = chunk;
-            } else if (chunk.y == topLeftChunk.y && chunk.x < topLeftChunk.x) {
-                topLeftChunk = chunk;
-            }
-        }
-
-        Room spawnRoom;
-        if (topLeftChunk == null || topLeftChunk.rooms.isEmpty()) {
-            spawnRoom = allRooms.get(0);
-        } else {
-            spawnRoom = topLeftChunk.rooms.get(0);
-        }
+        Room spawnRoom = allRooms.get(0);
 
         int spawnX = spawnRoom.centerAtX();
         int spawnY = spawnRoom.centerAtY();

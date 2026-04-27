@@ -19,7 +19,7 @@ public class World {
     private final int MAX_ROOM_H = 12;
 
     private final int MIN_ROOM_NUM = 1;
-    private final int MAX_ROOM_NUM = 3;
+    private final int MAX_ROOM_NUM = 1;
 
     private final Random random;
 
@@ -35,6 +35,7 @@ public class World {
     private final int[][] wallDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}, {-1,-1}, {-1,1}, {1,-1}, {1,1}};
     private final int[][] chunkDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
     private final Player player;
+    private List<Position> traps;
 
     /** Constructor **/
     public World(int width, int height, int chunkRows, int chunkCols, long seed) {
@@ -419,36 +420,49 @@ public class World {
         grid[spawnX][spawnY] = player.getAvator();
     }
 
-    public boolean movePlayer(char direction) {
-        Position pos = player.getPosition();
-        int newX = pos.x;
-        int newY = pos.y;
+    public void placeEnemy() {
+        for (Room room : allRooms) {
+            int enemyCount = random.nextInt(3); // 0,1,2
 
-        char lower = Character.toLowerCase(direction);
-        if (lower == 'w') {
-            newY += 1;
-        } else if (lower == 'a') {
-            newX -= 1;
-        } else if (lower == 's') {
-            newY -= 1;
-        } else if (lower == 'd') {
-            newX += 1;
-        } else {
-            return false;
+            for (int i = 0; i < enemyCount; i++) {
+                placeEnemyInRooms(room);
+            }
+        }
+    }
+
+    private void placeEnemyInRooms(Room room) {
+        int x = random.nextInt(room.w) + room.x;
+        int y = random.nextInt(room.h) + room.y;
+
+        if (grid[x][y] == Tileset.FLOOR){
+            grid[x][y] = Tileset.ENEMY;
         }
 
-        if (newX < 0 || newX >= WIDTH || newY < 0 || newY >= HEIGHT) {
-            return false;
-        }
+    }
 
-        if (grid[newX][newY] != Tileset.FLOOR) {
-            return false;
-        }
+    public void placeTrap() {
+        traps = new ArrayList<>();
+        for (Room room : allRooms) {
+            int enemyCount = random.nextInt(3); // 0,1,2
 
-        grid[pos.x][pos.y] = Tileset.FLOOR;
-        grid[newX][newY] = player.getAvator();
-        player.setPosition(new Position(newX, newY));
-        return true;
+            for (int i = 0; i < enemyCount; i++) {
+                placeTrapInRooms(room);
+            }
+        }
+    }
+
+    private void placeTrapInRooms(Room room) {
+        int x = random.nextInt(room.w - 2) + room.x + 1;
+        int y = random.nextInt(room.h - 2) + room.y + 1;
+
+        if (grid[x][y] == Tileset.FLOOR){
+            grid[x][y] = Tileset.TRAP;
+        }
+    }
+
+    private boolean inBounds(int x, int y) {
+        return x >= 0 && x < grid.length &&
+                y >= 0 && y < grid[0].length;
     }
 
     public TETile[][] getGrid() {

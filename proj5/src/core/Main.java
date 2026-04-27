@@ -143,6 +143,8 @@ public class Main {
         );
 
         world.placePlayer();
+        world.placeEnemy();
+        world.placeTrap();
 
         //Initializing the history with seed
         inputHistory = new StringBuilder();
@@ -192,13 +194,53 @@ public class Main {
         );
 
         world.placePlayer();
+        world.placeEnemy();
+        world.placeTrap();
 
         int start = history.indexOf('s') + 1;
 
-        for (int i = start; i < history.length(); i++) {
-            char c = history.charAt(i);
+        Player player = world.getPlayer();
+        TETile[][] tiles = world.getGrid();
 
-            applyMovement(world.getPlayer(), world, c);
+        for (int i = start; i < history.length(); i++) {
+            char key = history.charAt(i);
+
+            applyMovement(world.getPlayer(), world, key);
+
+            //Attack
+            if (key == 'j') {
+                Position attackPosi = player.attack();
+
+                if (attackPosi != null) {
+                    int ax = attackPosi.x;
+                    int ay = attackPosi.y;
+
+                    if (inBounds(ax, ay, tiles)) {
+
+                        TETile original = tiles[ax][ay];
+
+                        if (isAttackable(original)) {
+
+                            tiles[ax][ay] = player.getAttackTile();
+                            ter.drawTiles(tiles);
+                            StdDraw.show();
+
+                            StdDraw.pause(80);
+                            tiles[ax][ay] = original;
+
+
+                            if (original == Tileset.ENEMY) {
+                                tiles[ax][ay] = Tileset.FLOOR;
+                            }
+
+                            if (original == Tileset.TRAP) {
+                                player.deductHealth(1);
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         startGameFromReload(world, ter, history);
@@ -236,12 +278,16 @@ public class Main {
         char lower = Character.toLowerCase(move);
         if (lower == 'w') {
             newY += 1;
+            player.setDirection(Direction.UP);
         } else if (lower == 'a') {
             newX -= 1;
+            player.setDirection(Direction.LEFT);
         } else if (lower == 's') {
             newY -= 1;
+            player.setDirection(Direction.DOWN);
         } else if (lower == 'd') {
             newX += 1;
+            player.setDirection(Direction.RIGHT);
         } else {
             return;
         }
@@ -252,7 +298,24 @@ public class Main {
             return;
         }
 
-        world.getGrid()[pos.x][pos.y] = Tileset.FLOOR;
+        TETile[][] grid = world.getGrid();
+        grid[pos.x][pos.y] = player.getStandingOn();
+        TETile nextTile = grid[newX][newY];
+        //Update standingOn
+        player.setStandingOn(nextTile);
+
+        //Interaction
+        if (nextTile == Tileset.ENEMY) {
+            player.deductHealth(1);
+            //Smash the enemy, muhahaha
+            player.setStandingOn(Tileset.FLOOR);
+        }
+
+        if (nextTile == Tileset.TRAP) {
+            player.deductHealth(1);
+            player.setStandingOn(Tileset.TRAP);
+        }
+
         world.getGrid()[newX][newY] = player.getAvator();
         player.setPosition(next);
     }
@@ -307,6 +370,40 @@ public class Main {
                     System.exit(0);
                 } else {
                     waitForNextQ = false;
+                }
+
+                //Attack
+                if (key == 'j') {
+                    Position attackPosi = player.attack();
+
+                    if (attackPosi != null) {
+                        int ax = attackPosi.x;
+                        int ay = attackPosi.y;
+
+                        if (inBounds(ax, ay, tiles)) {
+
+                            TETile original = tiles[ax][ay];
+
+                            if (isAttackable(original)) {
+
+                                tiles[ax][ay] = player.getAttackTile();
+                                ter.drawTiles(tiles);
+                                StdDraw.show();
+
+                                StdDraw.pause(80);
+                                tiles[ax][ay] = original;
+
+
+                                if (original == Tileset.ENEMY) {
+                                    tiles[ax][ay] = Tileset.FLOOR;
+                                }
+
+                                if (original == Tileset.TRAP) {
+                                    player.deductHealth(1);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -365,6 +462,17 @@ public class Main {
 
             StdDraw.show();
         }
+    }
+
+    private static boolean inBounds(int x, int y, TETile[][] grid) {
+        return x >= 0 && x < grid.length &&
+                y >= 0 && y < grid[0].length;
+    }
+
+    private static boolean isAttackable(TETile tile) {
+        return tile == Tileset.FLOOR ||
+                tile == Tileset.ENEMY ||
+                tile == Tileset.TRAP;
     }
 
     private static void drawHUD(TETile[][] tiles, Player player) {

@@ -199,43 +199,43 @@ public class World {
         }
     }
 
-    private void connectChunks() {
-        edges = new ArrayList<>();
+    //private void connectChunks() {
+        //edges = new ArrayList<>();
 
         // Connected each rooms in every chunks
-        for (Chunk chunk : chunks) {
-            connectRoomsInChunk(chunk);
-        }
+        //for (Chunk chunk : chunks) {
+            //connectRoomsInChunk(chunk);
+        //}
 
         //Connect the critical path with BFS
-        connectChunkMST();
+        //connectChunkMST();
 
-        for (Chunk chunk : chunks) {
-            List<Chunk> neighbors = chunk.siblings;
-            if (neighbors.isEmpty()) {
-                continue;
-            }
+        //for (Chunk chunk : chunks) {
+            //List<Chunk> neighbors = chunk.siblings;
+            //if (neighbors.isEmpty()) {
+                //continue;
+            //}
 
             //Shuffle the rooms to make sure they're connected pseudorandomly based on the seed
-            List<Chunk> shuffled = new ArrayList<>(neighbors);
-            Collections.shuffle(shuffled, random);
+            //List<Chunk> shuffled = new ArrayList<>(neighbors);
+            //Collections.shuffle(shuffled, random);
 
-            int maxConnections = Math.min(4, shuffled.size());
+            //int maxConnections = Math.min(4, shuffled.size());
 
-            int connections = random.nextInt(maxConnections + 1); // from 0 to 3(max)
+            //int connections = random.nextInt(maxConnections + 1); // from 0 to 3(max)
 
-            for (int i = 0; i < connections; i++) {
-                Chunk other = shuffled.get(i);
+           // for (int i = 0; i < connections; i++) {
+                //Chunk other = shuffled.get(i);
 
-                Room a = getRandomRoom(chunk);
-                Room b = getRandomRoom(other);
+                //Room a = getRandomRoom(chunk);
+                //Room b = getRandomRoom(other);
 
-                if (a != null && b != null && a != b && !isDuplicateConnection(a, b)) {
-                    edges.add(new Edge(a, b));
-                }
-            }
-        }
-    }
+                //if (a != null && b != null && a != b && !isDuplicateConnection(a, b)) {
+                    //edges.add(new Edge(a, b));
+                //}
+            //}
+        //}
+    //}
 
     //Using Prim's algorithm based on pseudorandomness
     private void connectChunkMST() {

@@ -394,6 +394,63 @@ public class World {
 //        }
     }
 
+    public void placePlayer() {
+        Chunk topLeftChunk = null;
+        for (Chunk chunk : chunks) {
+            if (topLeftChunk == null) {
+                topLeftChunk = chunk;
+            } else if (chunk.y > topLeftChunk.y) {
+                topLeftChunk = chunk;
+            } else if (chunk.y == topLeftChunk.y && chunk.x < topLeftChunk.x) {
+                topLeftChunk = chunk;
+            }
+        }
+
+        Room spawnRoom;
+        if (topLeftChunk == null || topLeftChunk.rooms.isEmpty()) {
+            spawnRoom = allRooms.get(0);
+        } else {
+            spawnRoom = topLeftChunk.rooms.get(0);
+        }
+
+        int spawnX = spawnRoom.centerAtX();
+        int spawnY = spawnRoom.centerAtY();
+        player.setPosition(new Position(spawnX, spawnY));
+        grid[spawnX][spawnY] = player.getAvator();
+    }
+
+    public boolean movePlayer(char direction) {
+        Position pos = player.getPosition();
+        int newX = pos.x;
+        int newY = pos.y;
+
+        char lower = Character.toLowerCase(direction);
+        if (lower == 'w') {
+            newY += 1;
+        } else if (lower == 'a') {
+            newX -= 1;
+        } else if (lower == 's') {
+            newY -= 1;
+        } else if (lower == 'd') {
+            newX += 1;
+        } else {
+            return false;
+        }
+
+        if (newX < 0 || newX >= WIDTH || newY < 0 || newY >= HEIGHT) {
+            return false;
+        }
+
+        if (grid[newX][newY] != Tileset.FLOOR) {
+            return false;
+        }
+
+        grid[pos.x][pos.y] = Tileset.FLOOR;
+        grid[newX][newY] = player.getAvator();
+        player.setPosition(new Position(newX, newY));
+        return true;
+    }
+
     public TETile[][] getGrid() {
         return grid;
     }

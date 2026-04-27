@@ -133,6 +133,8 @@ public class Main {
                 seed
         );
 
+        world.placePlayer();
+
         //Initializing the history with seed
         inputHistory = new StringBuilder();
         inputHistory.append("n").append(seed).append("s");
@@ -180,6 +182,8 @@ public class Main {
                 seed
         );
 
+        world.placePlayer();
+
         boolean startReply = false;
 
         for (char c : history.toCharArray()) {
@@ -222,7 +226,32 @@ public class Main {
      *               Updating the player location by draw the avatar in the tiles
      */
     private static void applyMovement(Player player, World world, char move) {
+        Position pos = player.getPosition();
+        int newX = pos.x;
+        int newY = pos.y;
 
+        char lower = Character.toLowerCase(move);
+        if (lower == 'w') {
+            newY += 1;
+        } else if (lower == 'a') {
+            newX -= 1;
+        } else if (lower == 's') {
+            newY -= 1;
+        } else if (lower == 'd') {
+            newX += 1;
+        } else {
+            return;
+        }
+
+        Position next = new Position(newX, newY);
+
+        if (!isWalkable(world, next)) {
+            return;
+        }
+
+        world.getGrid()[pos.x][pos.y] = Tileset.FLOOR;
+        world.getGrid()[newX][newY] = player.getAvator();
+        player.setPosition(next);
     }
 
     private static boolean isWalkable(World world, Position next) {

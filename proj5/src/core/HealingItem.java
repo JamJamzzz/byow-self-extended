@@ -1,6 +1,6 @@
 package core;
 
-public class HealingItem {
+public class HealingItem implements Interactable {
     private int healAmount;
 
     public HealingItem(int healAmount) {
@@ -9,7 +9,6 @@ public class HealingItem {
 
     @Override
     public void interact(Player player) {
-        // heal the player but don't go over max hp
         int newHealth = player.getHealth() + healAmount;
         player.setHealth(Math.min(newHealth, player.getMaxHP()));
     }

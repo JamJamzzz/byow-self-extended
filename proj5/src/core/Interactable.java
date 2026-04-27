@@ -1,5 +1,5 @@
 package core;
 
-public class Iteractable {
+public interface Interactable {
     void interact(Player player);
 }

@@ -1,6 +1,6 @@
 package core;
 
-public class Coin {
+public class Coin implements Interactable {
     private int value;
 
     public Coin(int value) {

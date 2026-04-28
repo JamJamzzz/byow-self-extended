@@ -663,6 +663,10 @@ public class Main {
     }
 
     private static void showVictory() {
+        StdDraw.setCanvasSize(800, 600);
+        StdDraw.setXscale(0, 800);
+        StdDraw.setYscale(0, 600);
+
         StdDraw.clear(Color.black);
         StdDraw.setPenColor(Color.YELLOW);
         StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
@@ -685,6 +689,10 @@ public class Main {
     }
 
     private static void showGameOver() {
+        StdDraw.setCanvasSize(800, 600);
+        StdDraw.setXscale(0, 800);
+        StdDraw.setYscale(0, 600);
+
         StdDraw.clear(Color.black);
         StdDraw.setPenColor(Color.RED);
         StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));

@@ -615,7 +615,6 @@ public class Main {
             player.setStandingOn(nextTile);
             if (nextTile == Tileset.ENEMY) {
                 player.deductHealth(1);
-                // 可选：踩死敌人
                 player.setStandingOn(Tileset.FLOOR);
             }
 
@@ -675,6 +674,8 @@ public class Main {
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
         StdDraw.text(400, 280, "You collected all the coins!");
         StdDraw.text(400, 240, "Press M to return to Main Menu");
+        File file = new File("save.txt");
+        file.delete();
         StdDraw.show();
 
         while (true) {
@@ -700,6 +701,8 @@ public class Main {
         StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
         StdDraw.text(400, 280, "Press M to return to Main Menu");
+        File file = new File("save.txt");
+        file.delete();
         StdDraw.show();
 
         while (true) {

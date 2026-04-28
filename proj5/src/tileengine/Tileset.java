@@ -35,7 +35,7 @@ public class Tileset {
 
     public static final TETile CELL = new TETile('█', Color.white, Color.black, "cell", 12);
     public static final TETile ENEMY = new TETile('@', Color.RED, Color.black, "enemy", 13);
-    public static final TETile TRAP = new TETile('❀', Color.magenta, Color.BLACK, "flower", 14);
+    public static final TETile TRAP = new TETile('❀', Color.RED, Color.BLACK, "flower", 14);
     public static final TETile ATTACK_UP = new TETile('^', Color.white, Color.black, "attack up", 15);
     public static final TETile ATTACK_DOWN = new TETile('v', Color.white, Color.black, "attack down", 16);
     public static final TETile ATTACK_LEFT = new TETile('(', Color.white, Color.black, "attack left", 17);

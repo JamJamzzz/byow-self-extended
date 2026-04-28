@@ -1,5 +1,6 @@
 package core;
 
+import net.sf.saxon.expr.Component;
 import tileengine.TETile;
 import tileengine.Tileset;
 
@@ -59,6 +60,7 @@ public class Player {
     //Ambitious Features:
     public void deductHealth(int damage) {
         health -= damage;
+        health = Math.min(health, MaxHP);
     }
 
     public Position attack() {

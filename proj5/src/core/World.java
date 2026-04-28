@@ -471,6 +471,18 @@ public class World {
         }
     }
 
+    public int countCoins() {
+        int count = 0;
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                if (grid[x][y] == Tileset.UNLOCKED_DOOR) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     private boolean inBounds(int x, int y) {
         return x >= 0 && x < grid.length &&
                 y >= 0 && y < grid[0].length;

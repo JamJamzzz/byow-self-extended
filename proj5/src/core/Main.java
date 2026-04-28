@@ -464,6 +464,14 @@ public class Main {
             //Draw the overlay path
             drawPathOverlay(path);
 
+            if (player.getHealth() <= 0) {
+                showGameOver();
+            }
+
+            if (world.countCoins() == 0) {
+                showVictory();
+            }
+
             StdDraw.show();
         }
     }
@@ -651,6 +659,49 @@ public class Main {
 
         for (Position p : path) {
             Tileset.GRASS.draw(p.x, p.y);
+        }
+    }
+
+    private static void showVictory() {
+        StdDraw.clear(Color.black);
+        StdDraw.setPenColor(Color.YELLOW);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
+        StdDraw.text(400, 350, "YOU WIN!");
+        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
+        StdDraw.text(400, 280, "You collected all the coins!");
+        StdDraw.text(400, 240, "Press M to return to Main Menu");
+        StdDraw.show();
+
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = Character.toLowerCase(StdDraw.nextKeyTyped());
+                if (key == 'm') {
+                    showMenu();
+                    return;
+                }
+            }
+        }
+    }
+
+    private static void showGameOver() {
+        StdDraw.clear(Color.black);
+        StdDraw.setPenColor(Color.RED);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
+        StdDraw.text(400, 350, "YOU DIED");
+        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
+        StdDraw.text(400, 280, "Press M to return to Main Menu");
+        StdDraw.show();
+
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = Character.toLowerCase(StdDraw.nextKeyTyped());
+                if (key == 'm') {
+                    showMenu();
+                    return;
+                }
+            }
         }
     }
 

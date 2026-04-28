@@ -311,25 +311,15 @@ public class Main {
         //Interaction
         if (nextTile == Tileset.ENEMY) {
             player.deductHealth(1);
-            //Smash the enemy, muhahaha
             player.setStandingOn(Tileset.FLOOR);
-        }
-
-        if (nextTile == Tileset.TRAP) {
+        } else if (nextTile == Tileset.TRAP) {
             player.deductHealth(1);
             player.setStandingOn(Tileset.TRAP);
-        }
-
-        if (nextTile == Tileset.FLOWER) {
-            System.out.println("Before heal: " + player.getHealth());
+        } else if (nextTile == Tileset.FLOWER) {
             HealingItem heal = new HealingItem(1);
             heal.interact(player);
-            System.out.println("After heal: " + player.getHealth());
             player.setStandingOn(Tileset.FLOOR);
-        }
-
-        if (nextTile == Tileset.UNLOCKED_DOOR) {
-            // collect the coin when they walk onto it
+        } else if (nextTile == Tileset.UNLOCKED_DOOR) {
             Coin coin = new Coin(1);
             coin.interact(player);
             player.setStandingOn(Tileset.FLOOR);

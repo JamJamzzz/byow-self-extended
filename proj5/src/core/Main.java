@@ -229,13 +229,11 @@ public class Main {
             }
 
             applyMovement(player, world, key);
-            if (canMove) {
-                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
-                    world.moveEnemies();
-                }
-                if (playerMoveCount % 5 == 0) {
-                    world.moveTraps();
-                }
+            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+                world.moveEnemies();
+            }
+            if (playerMoveCount % 5 == 0) {
+                world.moveTraps();
             }
 
             if (player.getHealth() <= 0) {
@@ -345,10 +343,24 @@ public class Main {
         world.saveCheckpointIfLeavingRoom(pos, next);
 
         TETile[][] grid = world.getGrid();
-        grid[pos.x][pos.y] = player.getStandingOn();
+
+        Position old = player.getPosition();
+
         TETile nextTile = grid[newX][newY];
-        //Update standingOn
-        player.setStandingOn(nextTile);
+
+        if (nextTile == Tileset.ENEMY) {
+            player.deductHealth(1);
+            world.removeEnemyAt(next);
+            nextTile = Tileset.FLOOR;
+        } else if (nextTile == Tileset.TRAP) {
+            player.deductHealth(1);
+        } else if (nextTile == Tileset.FLOWER) {
+            new HealingItem(1).interact(player);
+            nextTile = Tileset.FLOOR;
+        } else if (nextTile == Tileset.UNLOCKED_DOOR) {
+            new Coin(1).interact(player);
+            nextTile = Tileset.FLOOR;
+        }
 
         //Interaction
         if (nextTile == Tileset.ENEMY) {
@@ -367,9 +379,10 @@ public class Main {
             coin.interact(player);
             player.setStandingOn(Tileset.FLOOR);
         }
-
-        world.getGrid()[newX][newY] = player.getAvator();
+        grid[old.x][old.y] = player.getStandingOn();
+        grid[next.x][next.y] = player.getAvator();
         player.setPosition(next);
+        player.setStandingOn(Tileset.FLOOR);
     }
 
     private static boolean isWalkable(World world, Position next) {
@@ -418,8 +431,11 @@ public class Main {
 
                 //Task 2 here:
                 applyMovement(player, world, key);
-                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
+                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
                     world.moveEnemies();
+                }
+                if (playerMoveCount % 5 == 0) {
+                    world.moveTraps();
                 }
 
                 if (key == ':') {
@@ -746,14 +762,12 @@ public class Main {
             //Update the current position
             player.setPosition(nextStep);
             playerMoveCount++;
-            if (canMove) {
-                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
-                    world.moveEnemies();
-                }
+            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+                world.moveEnemies();
+            }
 
-                if (playerMoveCount % 5 == 0) {
-                    world.moveTraps();
-                }
+            if (playerMoveCount % 5 == 0) {
+                world.moveTraps();
             }
 
             ter.drawTiles(grid);

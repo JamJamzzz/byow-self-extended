@@ -229,14 +229,20 @@ public class Main {
             }
 
             applyMovement(player, world, key);
-            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
                 world.moveEnemies();
             }
-            if (playerMoveCount % 5 == 0) {
+            if (playerMoveCount % 5 == 0 && canMove) {
                 world.moveTraps();
             }
 
             if (player.getHealth() <= 0) {
+                world.restoreCheckpoint();
+                playerMoveCount = 0;
+                canMove = false;
+            }
+
+            if (world.countCoins() == 0) {
                 world.restoreCheckpoint();
                 playerMoveCount = 0;
                 canMove = false;
@@ -431,10 +437,10 @@ public class Main {
 
                 //Task 2 here:
                 applyMovement(player, world, key);
-                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
                     world.moveEnemies();
                 }
-                if (playerMoveCount % 5 == 0) {
+                if (playerMoveCount % 5 == 0 && canMove) {
                     world.moveTraps();
                 }
 
@@ -540,6 +546,7 @@ public class Main {
                         path = null;
                         target = null;
                         playerMoveCount = 0;
+                        saveGame(inputHistory.toString());
                         continue;
                     }
                 }
@@ -558,7 +565,7 @@ public class Main {
             }
 
             if (world.countCoins() == 0) {
-                char choice = showGameOver();
+                char choice = showVictory();
                 if (choice == 'r') {
                     if (world.restoreCheckpoint()) {
                         ter.initialize(WIDTH, HEIGHT + HUD_HEIGHT);
@@ -566,6 +573,7 @@ public class Main {
                         target = null;
                         playerMoveCount = 0;
                         canMove = false;
+                        saveGame(inputHistory.toString());
                         continue;
                     }
                 }
@@ -762,11 +770,11 @@ public class Main {
             //Update the current position
             player.setPosition(nextStep);
             playerMoveCount++;
-            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
                 world.moveEnemies();
             }
 
-            if (playerMoveCount % 5 == 0) {
+            if (playerMoveCount % 5 == 0 && canMove) {
                 world.moveTraps();
             }
 
@@ -793,7 +801,7 @@ public class Main {
         }
     }
 
-    private static void showVictory() {
+    private static char showVictory() {
         StdDraw.setCanvasSize(800, 600);
         StdDraw.setXscale(0, 800);
         StdDraw.setYscale(0, 600);
@@ -818,18 +826,17 @@ public class Main {
         StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
         StdDraw.text(400, 280, "All coins collected. Legend!");
 
-        StdDraw.setPenColor(new Color(200, 200, 200));
+        StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 220, "Press M to return to Main Menu");
+        StdDraw.text(400, 220, "Press R to restart, M for menu, Q to quit");
 
         StdDraw.show();
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = Character.toLowerCase(StdDraw.nextKeyTyped());
-                if (key == 'm') {
-                    showMenu();
-                    return;
+                if (key == 'r' || key == 'm' || key == 'q') {
+                    return key;
                 }
             }
         }

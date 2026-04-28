@@ -457,6 +457,55 @@ public class World {
         return null;
     }
 
+    public void moveTraps() {
+        List<Position> nextTraps = new ArrayList<>();
+
+        for (Position trap : traps) {
+            Position next = randomTrapMove(trap);
+
+            if (next.equals(player.getPosition())) {
+                player.deductHealth(1);
+                nextTraps.add(trap); // trap stays
+                continue;
+            }
+
+            grid[trap.x][trap.y] = Tileset.FLOOR;
+            grid[next.x][next.y] = Tileset.TRAP;
+
+            nextTraps.add(next);
+        }
+        traps = nextTraps;
+    }
+
+    private Position randomTrapMove(Position trap) {
+        List<Position> options = new ArrayList<>();
+
+        Position[] candidates = {
+                new Position(trap.x + 1, trap.y),
+                new Position(trap.x - 1, trap.y),
+                new Position(trap.x, trap.y + 1),
+                new Position(trap.x, trap.y - 1)
+        };
+
+        for (Position p : candidates) {
+            if (canTrapMoveTo(p)) {
+                options.add(p);
+            }
+        }
+
+        if (options.isEmpty()) {
+            return trap;
+        }
+
+        return options.get(random.nextInt(options.size()));
+    }
+
+    private boolean canTrapMoveTo(Position p) {
+        if (!inBounds(p.x, p.y)) return false;
+
+        return grid[p.x][p.y] == Tileset.FLOOR;
+    }
+
     public void moveEnemies() {
         //This record the next move for all enemy
         //Every enemy's move should be recorded at the same time
@@ -553,10 +602,10 @@ public class World {
 
     public void placeHealingItems() {
         for (Room room : allRooms) {
-            if (random.nextBoolean()) {
+            int healCount = random.nextInt(2) + 1;
+            for (int i = 0; i < healCount; i++) {
                 int x = random.nextInt(room.w - 2) + room.x + 1;
                 int y = random.nextInt(room.h - 2) + room.y + 1;
-
                 if (grid[x][y] == Tileset.FLOOR) {
                     grid[x][y] = Tileset.FLOWER;
                 }

@@ -76,19 +76,25 @@ public class Main {
     }
 
     private static void draw() {
-        StdDraw.clear(Color.black);
+        StdDraw.clear(new Color(15, 15, 30));
 
-        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.setPenColor(new Color(255, 215, 0));
+        StdDraw.rectangle(400, 300, 360, 260);
+        StdDraw.rectangle(400, 300, 355, 255);
 
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
-        StdDraw.text(400, 450, "CS61B: BYOW");
+        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 48));
+        StdDraw.text(400, 470, "CS61B: BYOW");
 
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 300, "(N) New Game");
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 250, "(L) Load Game");
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 200, "(Q) Quit Game");
+        StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
+        StdDraw.text(400, 420, "Dungeon Adventure");
+
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 24));
+        StdDraw.text(400, 320, "(N) New Game");
+        StdDraw.text(400, 270, "(L) Load Game");
+        StdDraw.text(400, 220, "(Q) Quit Game");
+
+        StdDraw.line(250, 380, 550, 380);
 
         StdDraw.show();
     }
@@ -149,6 +155,7 @@ public class Main {
         world.placeEnemy();
         world.placeTrap();
         world.placeHealingItems();
+        world.placeHealingItems();
         world.placeCoins();
 
         //Initializing the history with seed
@@ -203,6 +210,7 @@ public class Main {
         world.placePlayer();
         world.placeEnemy();
         world.placeTrap();
+        world.placeHealingItems();
         world.placeHealingItems();
         world.placeCoins();
         world.saveCheckpoint();
@@ -401,7 +409,6 @@ public class Main {
 
                 if (key == 'e') {
                     player.toggleInvincible();
-                    continue;
                 }
 
                 //Task 2 here:
@@ -555,6 +562,7 @@ public class Main {
                 }
             }
 
+
             StdDraw.show();
         }
     }
@@ -582,6 +590,15 @@ public class Main {
 
         //Display the status of player
         drawPlayerStatus(player);
+
+        //status of invincible mode
+        if (player.isInvincible()) {
+            StdDraw.setPenColor(Color.RED);
+        } else {
+            StdDraw.setPenColor(Color.WHITE);
+        }
+        StdDraw.textLeft(WIDTH - 35, HEIGHT + HUD_HEIGHT - 1, "(e)nable invincible mode");
+
 
         // Display coin
         StdDraw.setPenColor(Color.YELLOW);
@@ -724,8 +741,14 @@ public class Main {
             //Update the current position
             player.setPosition(nextStep);
             playerMoveCount++;
-            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
-                world.moveEnemies();
+            if (canMove) {
+                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+                    world.moveEnemies();
+                }
+
+                if (playerMoveCount % 5 == 0) {
+                    world.moveTraps();
+                }
             }
 
             ter.drawTiles(grid);
@@ -751,35 +774,43 @@ public class Main {
         }
     }
 
-    private static char showVictory() {
+    private static void showVictory() {
         StdDraw.setCanvasSize(800, 600);
         StdDraw.setXscale(0, 800);
         StdDraw.setYscale(0, 600);
 
-        StdDraw.clear(Color.black);
-        StdDraw.setPenColor(Color.YELLOW);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
-        StdDraw.text(400, 350, "YOU WIN!");
+        StdDraw.clear(new Color(10, 25, 10));
+
+        StdDraw.setPenColor(new Color(255, 215, 0));
+        StdDraw.rectangle(400, 300, 350, 250);
+        StdDraw.rectangle(400, 300, 340, 240);
+
+        StdDraw.setPenColor(new Color(255, 215, 0));
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 80));
+        StdDraw.text(400, 430, "★");
+
+        StdDraw.text(400, 260, "Treasure secured!");
+
+        StdDraw.setPenColor(new Color(255, 215, 0));
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 50));
+        StdDraw.text(400, 340, "YOU WIN!");
+
         StdDraw.setPenColor(Color.WHITE);
+        StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
+        StdDraw.text(400, 280, "All coins collected. Legend!");
+
+        StdDraw.setPenColor(new Color(200, 200, 200));
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 280, "You collected all the coins!");
-        StdDraw.text(400, 240, "Press M to return to Main Menu");
-        StdDraw.text(400, 220, "Press Q to exit the game");
+        StdDraw.text(400, 220, "Press M to return to Main Menu");
+
         StdDraw.show();
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = Character.toLowerCase(StdDraw.nextKeyTyped());
-                if (key == 'r') {
-                    return 'r';
-                }
-
                 if (key == 'm') {
-                    return 'm';
-                }
-
-                if (key == 'q') {
-                    return 'q';
+                    showMenu();
+                    return;
                 }
             }
         }
@@ -790,28 +821,36 @@ public class Main {
         StdDraw.setXscale(0, 800);
         StdDraw.setYscale(0, 600);
 
-        StdDraw.clear(Color.black);
+        StdDraw.clear(new Color(15, 0, 0));
+        StdDraw.text(400, 180, "Press R to retry");
+
         StdDraw.setPenColor(Color.RED);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
-        StdDraw.text(400, 350, "YOU DIED");
+        StdDraw.rectangle(400, 300, 350, 250);
+
+        StdDraw.setPenColor(Color.RED);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 80));
+        StdDraw.text(400, 430, "☠");
+
+        StdDraw.setPenColor(Color.RED);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 50));
+        StdDraw.text(400, 340, "YOU DIED");
+
+        StdDraw.setPenColor(new Color(200, 200, 200));
+        StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
+        StdDraw.text(400, 280, "The dungeon claims another soul...");
+
         StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 280, "Press R to revive from the checkpoint (you suck)");
-        StdDraw.text(400, 240, "Press M to return to Main Menu");
-        StdDraw.text(400, 220, "Press Q to exit the game");
+        StdDraw.text(400, 220, "Press R to restart, M for menu, Q to quit");
+
         StdDraw.show();
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = Character.toLowerCase(StdDraw.nextKeyTyped());
-                if (key == 'r') {
-                    return 'r';
-                }
-                if (key == 'm') {
-                    return 'm';
-                }
-                if (key == 'q') {
-                    return 'q';
+
+                if (key == 'r' || key == 'm' || key == 'q') {
+                    return key;
                 }
             }
         }

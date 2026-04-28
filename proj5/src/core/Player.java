@@ -26,7 +26,7 @@ public class Player {
     TETile standingOn;
 
     /** Invincible!!! **/
-    private boolean invincible;
+    private boolean invincible = false;
 
     public Player() {
         health = 3;

@@ -228,9 +228,14 @@ public class Main {
                 continue;
             }
 
-            applyMovement(world.getPlayer(), world, key);
-            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
-                world.moveEnemies();
+            applyMovement(player, world, key);
+            if (canMove) {
+                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+                    world.moveEnemies();
+                }
+                if (playerMoveCount % 5 == 0) {
+                    world.moveTraps();
+                }
             }
 
             if (player.getHealth() <= 0) {

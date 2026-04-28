@@ -458,6 +458,8 @@ public class World {
     }
 
     public void moveTraps() {
+        System.out.println("moveTraps called");
+        System.out.println("number of traps: " + traps.size());
         List<Position> nextTraps = new ArrayList<>();
 
         for (Position trap : traps) {

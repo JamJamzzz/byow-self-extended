@@ -25,12 +25,16 @@ public class Player {
     private Direction direction;
     TETile standingOn;
 
+    /** Invincible!!! **/
+    private boolean invincible;
+
     public Player() {
         health = 3;
         MaxHP = 5;
         avator = Tileset.AVATAR;
         direction = Direction.UP;
         standingOn = Tileset.FLOOR;
+        invincible = false;
     }
 
     public int getHealth() {
@@ -59,6 +63,10 @@ public class Player {
 
     //Ambitious Features:
     public void deductHealth(int damage) {
+        if (invincible) {
+            return;
+        }
+
         health -= damage;
         health = Math.min(health, MaxHP);
     }
@@ -98,6 +106,10 @@ public class Player {
         money += amount;
     }
 
+    public void setMoney(int amount) {
+        money = amount;
+    }
+
     public TETile getStandingOn() {
         return standingOn;
     }
@@ -108,5 +120,17 @@ public class Player {
 
     public void death() {
         ;
+    }
+
+    public void setInvincible(boolean invincible) {
+        this.invincible = invincible;
+    }
+
+    public boolean isInvincible() {
+        return invincible;
+    }
+
+    public void toggleInvincible() {
+        invincible = !invincible;
     }
 }

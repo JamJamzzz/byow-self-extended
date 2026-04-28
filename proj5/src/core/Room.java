@@ -13,4 +13,8 @@ public class Room {
     int centerAtY() {
         return y + h / 2;
     }
+
+    boolean contains(Position p) {
+        return p.x >= x && p.x < x + w && p.y >= y && p.y < y + h;
+    }
 }

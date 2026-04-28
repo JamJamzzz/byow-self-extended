@@ -35,7 +35,9 @@ public class World {
     private final int[][] wallDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}, {-1,-1}, {-1,1}, {1,-1}, {1,1}};
     private final int[][] chunkDirections = new int[][]{{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
     private final Player player;
+    private List<Position> enemies;
     private List<Position> traps;
+    private Checkpoint checkpoint;
 
     /** Constructor **/
     public World(int width, int height, int chunkRows, int chunkCols, long seed) {
@@ -404,6 +406,7 @@ public class World {
     }
 
     public void placeEnemy() {
+        enemies = new ArrayList<>();
         for (Room room : allRooms) {
             int enemyCount = random.nextInt(3); // 0,1,2
 
@@ -419,6 +422,7 @@ public class World {
 
         if (grid[x][y] == Tileset.FLOOR){
             grid[x][y] = Tileset.ENEMY;
+            enemies.add(new Position(x, y));
         }
 
     }
@@ -440,7 +444,111 @@ public class World {
 
         if (grid[x][y] == Tileset.FLOOR){
             grid[x][y] = Tileset.TRAP;
+            traps.add(new Position(x, y));
         }
+    }
+
+    private Room roomAt(Position p) {
+        for (Room room : allRooms) {
+            if (room.contains(p)) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    public void moveEnemies() {
+        //This record the next move for all enemy
+        //Every enemy's move should be recorded at the same time
+        // rather than just moving the enemy and update the enemy
+        List<Position> nextEnemies = new ArrayList<>();
+
+        for (Position enemy : enemies) {
+            Room enemyRoom = roomAt(enemy);
+            Room playerRoom = roomAt(player.getPosition());
+
+            Position next;
+            if (enemyRoom != null && enemyRoom == playerRoom) {
+                //If the player is at the enemy's room, enemy will chase the Player
+                next = chasePlayer(enemy, enemyRoom);
+            } else {
+                //Else, random walk
+                next = randomWalk(enemy, enemyRoom);
+            }
+
+            //If the enemy touched the player, player will hurt
+            if (next.equals(player.getPosition())) {
+                player.deductHealth(1);
+                nextEnemies.add(enemy);
+                continue;
+            }
+
+            grid[enemy.x][enemy.y] = Tileset.FLOOR;
+            grid[next.x][next.y] = Tileset.ENEMY;
+            nextEnemies.add(next);
+        }
+
+        enemies = nextEnemies;
+    }
+
+    /** Get the next location of the random walk **/
+    private Position randomWalk(Position enemy, Room room) {
+        List<Position> options = enemyNeighbors(enemy, room);
+        if (options.isEmpty()) {
+            return enemy;
+        }
+        return options.get(random.nextInt(options.size()));
+    }
+
+    /** Get the next location of chasing the player **/
+    private Position chasePlayer(Position enemy, Room room) {
+        List<Position> options = enemyNeighbors(enemy, room);
+        Position best = enemy;
+        int bestDist = distance(enemy, player.getPosition());
+
+        for (Position option : options) {
+            int d = distance(option, player.getPosition());
+            if (d < bestDist) {
+                best = option;
+                bestDist = d;
+            }
+        }
+
+        return best;
+    }
+
+    private int distance(Position a, Position b) {
+        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    }
+
+    private List<Position> enemyNeighbors(Position p, Room room) {
+        List<Position> result = new ArrayList<>();
+        Position[] candidates = {
+                new Position(p.x + 1, p.y),
+                new Position(p.x - 1, p.y),
+                new Position(p.x, p.y + 1),
+                new Position(p.x, p.y - 1)
+        };
+
+        for (Position c : candidates) {
+            //The enemy can step to floor or the next step is the player
+            if (canEnemyMoveTo(c, room) || c.equals(player.getPosition())) {
+                result.add(c);
+            }
+        }
+
+        return result;
+    }
+
+    private boolean canEnemyMoveTo(Position p, Room room) {
+        if (room == null || !room.contains(p)) {
+            return false;
+        }
+        return grid[p.x][p.y] == Tileset.FLOOR;
+    }
+
+    public void removeEnemyAt(Position p) {
+        enemies.remove(p);
     }
 
     public void placeHealingItems() {
@@ -499,4 +607,72 @@ public class World {
     public long getSeed() {
         return seed;
     }
+
+    public void saveCheckpoint() {
+        //Replace with the new checkpoint
+        checkpoint = new Checkpoint();
+
+        checkpoint.grid = TETile.copyOf(grid);
+        checkpoint.enemies = copyPositions(enemies);
+        checkpoint.traps = copyPositions(traps);
+
+        checkpoint.playerPosition = new Position(player.getPosition().x, player.getPosition().y);
+        checkpoint.playerHealth = player.getHealth();
+        checkpoint.playerMoney = player.getMoney();
+        checkpoint.playerStandingOn = player.getStandingOn();
+    }
+
+    private List<Position> copyPositions(List<Position> positions) {
+        List<Position> copy = new ArrayList<>();
+
+        if (positions == null) {
+            return copy;
+        }
+
+        for (Position p : positions) {
+            copy.add(new Position(p.x, p.y));
+        }
+
+        return copy;
+    }
+
+    //Save a snapshot of the checkpoint when the player leaving a room
+    public void saveCheckpointIfLeavingRoom(Position from, Position to) {
+        Room fromRoom = roomAt(from);
+        Room toRoom = roomAt(to);
+
+        if (fromRoom != null && fromRoom != toRoom) {
+            saveCheckpoint();
+        }
+    }
+
+    //Reload the world form checkpoint
+    public boolean restoreCheckpoint() {
+        if (checkpoint == null) {
+            return false;
+        }
+
+        //Update the grid
+        for (int x = 0; x < grid.length; x++) {
+            for (int y = 0; y < grid[0].length; y++) {
+                grid[x][y] = checkpoint.grid[x][y];
+            }
+        }
+
+        //Update everything
+        enemies = copyPositions(checkpoint.enemies);
+        traps = copyPositions(checkpoint.traps);
+
+        player.setPosition(new Position(
+                checkpoint.playerPosition.x,
+                checkpoint.playerPosition.y
+        ));
+
+        player.setHealth(checkpoint.playerHealth);
+        player.setMoney(checkpoint.playerMoney);
+        player.setStandingOn(checkpoint.playerStandingOn);
+
+        return true;
+    }
+
 }

@@ -27,6 +27,9 @@ public class Main {
      * World Record
      **/
     private static StringBuilder inputHistory;
+    private static int playerMoveCount = 0;
+    private static final int ENEMY_MOVE_INTERVAL = 2;
+    private static boolean canMove = false;
 
     public static void main(String[] args) {
         showMenu();
@@ -152,6 +155,8 @@ public class Main {
         inputHistory = new StringBuilder();
         inputHistory.append("n").append(seed).append("s");
 
+        world.saveCheckpoint();
+
         //Initializing the render
         TERenderer ter = new TERenderer();
         ter.initialize(WIDTH, HEIGHT + HUD_HEIGHT);
@@ -200,6 +205,7 @@ public class Main {
         world.placeTrap();
         world.placeHealingItems();
         world.placeCoins();
+        world.saveCheckpoint();
 
         int start = history.indexOf('s') + 1;
 
@@ -209,7 +215,21 @@ public class Main {
         for (int i = start; i < history.length(); i++) {
             char key = history.charAt(i);
 
+            if (key == 'e') {
+                player.toggleInvincible();
+                continue;
+            }
+
             applyMovement(world.getPlayer(), world, key);
+            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
+                world.moveEnemies();
+            }
+
+            if (player.getHealth() <= 0) {
+                world.restoreCheckpoint();
+                playerMoveCount = 0;
+                canMove = false;
+            }
 
             //Attack
             if (key == 'j') {
@@ -235,10 +255,17 @@ public class Main {
 
                             if (original == Tileset.ENEMY) {
                                 tiles[ax][ay] = Tileset.FLOOR;
+                                world.removeEnemyAt(attackPosi);
                             }
 
                             if (original == Tileset.TRAP) {
                                 player.deductHealth(1);
+                            }
+
+                            if (player.getHealth() <= 0) {
+                                world.restoreCheckpoint();
+                                playerMoveCount = 0;
+                                canMove = false;
                             }
                         }
                     }
@@ -264,16 +291,6 @@ public class Main {
         return Long.parseLong(sb.toString());
     }
 
-    //Implement for task2
-
-    /**
-     *
-     * @param player add a spawn player function in World class,
-     *               should be called in the constructor
-     * @param world
-     * @param move   only deal with wasd/WASD, make sure that the player wouldn't be stuck in the wall
-     *               Updating the player location by draw the avatar in the tiles
-     */
     private static void applyMovement(Player player, World world, char move) {
         Position pos = player.getPosition();
         int newX = pos.x;
@@ -283,24 +300,36 @@ public class Main {
         if (lower == 'w') {
             newY += 1;
             player.setDirection(Direction.UP);
+            playerMoveCount++;
+            canMove = true;
         } else if (lower == 'a') {
             newX -= 1;
             player.setDirection(Direction.LEFT);
+            playerMoveCount++;
+            canMove = true;
         } else if (lower == 's') {
             newY -= 1;
             player.setDirection(Direction.DOWN);
+            playerMoveCount++;
+            canMove = true;
         } else if (lower == 'd') {
             newX += 1;
             player.setDirection(Direction.RIGHT);
+            playerMoveCount++;
+            canMove = true;
         } else {
+            canMove = false;
             return;
         }
 
         Position next = new Position(newX, newY);
 
         if (!isWalkable(world, next)) {
+            canMove = false;
             return;
         }
+        //Check if the player is leaving the room or not
+        world.saveCheckpointIfLeavingRoom(pos, next);
 
         TETile[][] grid = world.getGrid();
         grid[pos.x][pos.y] = player.getStandingOn();
@@ -312,6 +341,7 @@ public class Main {
         if (nextTile == Tileset.ENEMY) {
             player.deductHealth(1);
             player.setStandingOn(Tileset.FLOOR);
+            world.removeEnemyAt(new Position(newX, newY));
         } else if (nextTile == Tileset.TRAP) {
             player.deductHealth(1);
             player.setStandingOn(Tileset.TRAP);
@@ -369,8 +399,16 @@ public class Main {
 
                 inputHistory.append(key);
 
+                if (key == 'e') {
+                    player.toggleInvincible();
+                    continue;
+                }
+
                 //Task 2 here:
                 applyMovement(player, world, key);
+                if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
+                    world.moveEnemies();
+                }
 
                 if (key == ':') {
                     waitForNextQ = true;
@@ -405,6 +443,7 @@ public class Main {
 
                                 if (original == Tileset.ENEMY) {
                                     tiles[ax][ay] = Tileset.FLOOR;
+                                    world.removeEnemyAt(attackPosi);
                                 }
 
                                 if (original == Tileset.TRAP) {
@@ -465,11 +504,55 @@ public class Main {
             drawPathOverlay(path);
 
             if (player.getHealth() <= 0) {
-                showGameOver();
+                char choice = showGameOver();
+                if (choice == 'r') {
+                    if (world.restoreCheckpoint()) {
+                        //Initiliazing the grid
+                        ter.initialize(WIDTH, HEIGHT + HUD_HEIGHT);
+                        path = null;
+                        target = null;
+                        playerMoveCount = 0;
+                        continue;
+                    }
+                }
+
+                if (choice == 'm') {
+                    File file = new File("save.txt");
+                    file.delete();
+                    showMenu();
+                    return;
+                }
+
+                if (choice == 'q') {
+                    saveGame(inputHistory.toString());
+                    System.exit(0);
+                }
             }
 
             if (world.countCoins() == 0) {
-                showVictory();
+                char choice = showGameOver();
+                if (choice == 'r') {
+                    if (world.restoreCheckpoint()) {
+                        ter.initialize(WIDTH, HEIGHT + HUD_HEIGHT);
+                        path = null;
+                        target = null;
+                        playerMoveCount = 0;
+                        canMove = false;
+                        continue;
+                    }
+                }
+
+                if (choice == 'm') {
+                    File file = new File("save.txt");
+                    file.delete();
+                    showMenu();
+                    return;
+                }
+
+                if (choice == 'q') {
+                    saveGame(inputHistory.toString());
+                    System.exit(0);
+                }
             }
 
             StdDraw.show();
@@ -602,6 +685,7 @@ public class Main {
         }
 
         TETile[][] grid = world.getGrid();
+        canMove = true;
 
         for (Position nextStep : path) {
             //Clear the old position
@@ -610,6 +694,7 @@ public class Main {
             char move = getMove(oldStep, nextStep);
             inputHistory.append(move);
 
+            world.saveCheckpointIfLeavingRoom(oldStep, nextStep);
             grid[oldStep.x][oldStep.y] = player.getStandingOn();
             TETile nextTile = grid[nextStep.x][nextStep.y];
             player.setStandingOn(nextTile);
@@ -638,11 +723,16 @@ public class Main {
             grid[nextStep.x][nextStep.y] = player.getAvator();
             //Update the current position
             player.setPosition(nextStep);
+            playerMoveCount++;
+            if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0) {
+                world.moveEnemies();
+            }
 
             ter.drawTiles(grid);
             StdDraw.show();
         }
         player.setStandingOn(Tileset.FLOOR);
+        canMove = false;
     }
 
     private static char getMove(Position from, Position to) {
@@ -661,7 +751,7 @@ public class Main {
         }
     }
 
-    private static void showVictory() {
+    private static char showVictory() {
         StdDraw.setCanvasSize(800, 600);
         StdDraw.setXscale(0, 800);
         StdDraw.setYscale(0, 600);
@@ -674,22 +764,28 @@ public class Main {
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
         StdDraw.text(400, 280, "You collected all the coins!");
         StdDraw.text(400, 240, "Press M to return to Main Menu");
-        File file = new File("save.txt");
-        file.delete();
+        StdDraw.text(400, 220, "Press Q to exit the game");
         StdDraw.show();
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = Character.toLowerCase(StdDraw.nextKeyTyped());
+                if (key == 'r') {
+                    return 'r';
+                }
+
                 if (key == 'm') {
-                    showMenu();
-                    return;
+                    return 'm';
+                }
+
+                if (key == 'q') {
+                    return 'q';
                 }
             }
         }
     }
 
-    private static void showGameOver() {
+    private static char showGameOver() {
         StdDraw.setCanvasSize(800, 600);
         StdDraw.setXscale(0, 800);
         StdDraw.setYscale(0, 600);
@@ -700,17 +796,22 @@ public class Main {
         StdDraw.text(400, 350, "YOU DIED");
         StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 280, "Press M to return to Main Menu");
-        File file = new File("save.txt");
-        file.delete();
+        StdDraw.text(400, 280, "Press R to revive from the checkpoint (you suck)");
+        StdDraw.text(400, 240, "Press M to return to Main Menu");
+        StdDraw.text(400, 220, "Press Q to exit the game");
         StdDraw.show();
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = Character.toLowerCase(StdDraw.nextKeyTyped());
+                if (key == 'r') {
+                    return 'r';
+                }
                 if (key == 'm') {
-                    showMenu();
-                    return;
+                    return 'm';
+                }
+                if (key == 'q') {
+                    return 'q';
                 }
             }
         }

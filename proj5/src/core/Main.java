@@ -816,8 +816,6 @@ public class Main {
         StdDraw.setFont(new Font("Monaco", Font.BOLD, 80));
         StdDraw.text(400, 430, "★");
 
-        StdDraw.text(400, 260, "Treasure secured!");
-
         StdDraw.setPenColor(new Color(255, 215, 0));
         StdDraw.setFont(new Font("Monaco", Font.BOLD, 50));
         StdDraw.text(400, 340, "YOU WIN!");

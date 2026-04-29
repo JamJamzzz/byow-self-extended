@@ -16,7 +16,7 @@ public class Main {
     /**
      * World Parameters
      **/
-    private static final int WIDTH = 80;
+    private static final int WIDTH = 70;
     private static final int HEIGHT = 50;
     private static final int CHUNK_ROWS = 4;
     private static final int CHUNK_COLS = 4;

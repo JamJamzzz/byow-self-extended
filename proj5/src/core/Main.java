@@ -118,7 +118,7 @@ public class Main {
                 char ch = StdDraw.nextKeyTyped();
 
                 if (Character.isDigit(ch)) {
-                    if (seedStr.length() < 18) {
+                    if (seedStr.length() < 20) {
                         seedStr.append(ch);
                     }
                     drawSeed(seedStr.toString());

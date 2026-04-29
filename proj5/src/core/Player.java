@@ -132,5 +132,10 @@ public class Player {
 
     public void toggleInvincible() {
         invincible = !invincible;
+        if (invincible) {
+            avator = Tileset.AURORA;
+        } else {
+            avator = Tileset.AVATAR;
+        }
     }
 }

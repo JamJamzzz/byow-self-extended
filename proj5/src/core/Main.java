@@ -21,7 +21,7 @@ public class Main {
     private static final int CHUNK_ROWS = 4;
     private static final int CHUNK_COLS = 4;
 
-    private static final int HUD_HEIGHT = 2;
+    private static final int HUD_HEIGHT = 3;
 
     /**
      * World Record
@@ -30,6 +30,9 @@ public class Main {
     private static int playerMoveCount = 0;
     private static final int ENEMY_MOVE_INTERVAL = 2;
     private static boolean canMove = false;
+
+    private static String hudMessage = "";
+    private static int hudMessageTimer = 0;
 
     public static void main(String[] args) {
         showMenu();
@@ -119,6 +122,9 @@ public class Main {
                         seedStr.append(ch);
                     }
                     drawSeed(seedStr.toString());
+                }else if ((ch == '\b' || ch == 127) && seedStr.length() > 0) {
+                    seedStr.deleteCharAt(seedStr.length() - 1);
+                    drawSeed(seedStr.toString());
                 } else if (ch == 's' || ch == 'S') {
                     if (seedStr.length() == 0) {
                         continue;
@@ -135,18 +141,52 @@ public class Main {
         double centerX = WIDTH / 2.0;
         double centerY = HEIGHT / 2.0;
 
-        StdDraw.clear(Color.BLACK);
+        Color bg = new Color(6, 16, 28);
+        Color panel = new Color(18, 42, 62);
+        Color ice = new Color(145, 205, 225);
+        Color frost = new Color(190, 240, 255);
+        Color gold = new Color(255, 220, 105);
+        Color dim = new Color(70, 105, 145);
 
-        StdDraw.setPenColor(Color.WHITE);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 36));
-        StdDraw.text(centerX, centerY + 10, "CS61B: BYOW");
+        StdDraw.clear(bg);
 
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
-        StdDraw.text(centerX, centerY + 2, "Enter seed followed by S");
+        StdDraw.setPenColor(panel);
+        StdDraw.filledRectangle(centerX, centerY, WIDTH * 0.42, HEIGHT * 0.30);
 
-        StdDraw.setPenColor(Color.YELLOW);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 24));
-        StdDraw.text(centerX, centerY - 6, seed);
+        StdDraw.setPenColor(ice);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.42, HEIGHT * 0.30);
+
+        StdDraw.setPenColor(dim);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.38, HEIGHT * 0.26);
+
+        StdDraw.setPenColor(frost);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 34));
+        StdDraw.text(centerX, centerY + 9, "OPEN THE FROST VAULT");
+
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 16));
+        StdDraw.text(centerX, centerY + 4, "Enter a seed, then press S");
+
+        StdDraw.setPenColor(new Color(10, 25, 40));
+        StdDraw.filledRectangle(centerX, centerY - 3, WIDTH * 0.25, 2.2);
+
+        StdDraw.setPenColor(dim);
+        StdDraw.rectangle(centerX, centerY - 3, WIDTH * 0.25, 2.2);
+
+        StdDraw.setPenColor(gold);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 22));
+
+        String displaySeed;
+        if (seed.length() == 0) {
+            displaySeed = "Seed: _";
+        } else {
+            displaySeed = "Seed: " + seed + "_";
+        }
+
+        StdDraw.text(centerX, centerY - 3, displaySeed);
+
+        StdDraw.setPenColor(ice);
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 13));
+        StdDraw.text(centerX, centerY - 10, "Backspace edits   S begins the run");
 
         StdDraw.show();
     }
@@ -165,7 +205,7 @@ public class Main {
         world.placeEnemy();
         world.placeTrap();
         world.placeHealingItems();
-        world.placeHealingItems();
+
         world.placeCoins();
 
         //Initializing the history with seed
@@ -220,7 +260,6 @@ public class Main {
         world.placePlayer();
         world.placeEnemy();
         world.placeTrap();
-        world.placeHealingItems();
         world.placeHealingItems();
         world.placeCoins();
         world.saveCheckpoint();
@@ -374,14 +413,16 @@ public class Main {
         } else if (nextTile == Tileset.TRAP) {
             player.deductHealth(1);
             player.setStandingOn(Tileset.TRAP);
-        } else if (nextTile == Tileset.FLOWER) {
+        } else if (nextTile == Tileset.HEAL) {
             HealingItem heal = new HealingItem(1);
             heal.interact(player);
             player.setStandingOn(Tileset.FLOOR);
+            showHudMessage("Warmth restored");
         } else if (nextTile == Tileset.UNLOCKED_DOOR) {
             Coin coin = new Coin(1);
             coin.interact(player);
             player.setStandingOn(Tileset.FLOOR);
+            showHudMessage("+1 coin");
         }else{
             player.setStandingOn(Tileset.FLOOR);
         }
@@ -434,6 +475,17 @@ public class Main {
 
                 if (key == 'e') {
                     player.toggleInvincible();
+
+                    Position p = player.getPosition();
+                    world.getGrid()[p.x][p.y] = player.getAvator();
+
+                    if (player.isInvincible()) {
+                        showHudMessage("Aurora awakened");
+                    } else {
+                        showHudMessage("Aurora faded");
+                    }
+
+                    continue;
                 }
 
                 //Task 2 here:
@@ -478,10 +530,12 @@ public class Main {
 
                                 if (original == Tileset.ENEMY) {
                                     tiles[ax][ay] = Tileset.FLOOR;
+                                    showHudMessage("Smashed an enemy");
                                     world.removeEnemyAt(attackPosi);
                                 }
 
                                 if (original == Tileset.TRAP) {
+                                    showHudMessage("Ouch");
                                     player.deductHealth(1);
                                 }
                             }
@@ -548,6 +602,7 @@ public class Main {
                         target = null;
                         playerMoveCount = 0;
                         saveGame(inputHistory.toString());
+                        showHudMessage("Returned to checkpoint");
                         continue;
                     }
                 }
@@ -575,6 +630,7 @@ public class Main {
                         playerMoveCount = 0;
                         canMove = false;
                         saveGame(inputHistory.toString());
+                        showHudMessage("Returned to checkpoint");
                         continue;
                     }
                 }
@@ -609,8 +665,14 @@ public class Main {
     }
 
     private static void drawHUD(TETile[][] tiles, Player player) {
-        //Gray Background
-        StdDraw.setPenColor(Color.GRAY);
+        Color hudBg = new Color(20, 34, 50);
+        Color ice = new Color(145, 205, 225);
+        Color frost = new Color(190, 240, 255);
+        Color gold = new Color(255, 220, 105);
+        Color danger = new Color(255, 95, 135);
+        Color dim = new Color(80, 95, 110);
+
+        StdDraw.setPenColor(hudBg);
         StdDraw.filledRectangle(
                 WIDTH / 2.0,
                 HEIGHT + HUD_HEIGHT / 2.0,
@@ -618,55 +680,63 @@ public class Main {
                 HUD_HEIGHT / 2.0
         );
 
-        //Display the status of player
-        drawPlayerStatus(player);
-
-        //status of invincible mode
-        if (player.isInvincible()) {
-            StdDraw.setPenColor(Color.RED);
-        } else {
-            StdDraw.setPenColor(Color.WHITE);
+        if (hudMessageTimer > 0) {
+            StdDraw.setPenColor(new Color(190, 240, 255));
+            StdDraw.setFont(new Font("Monaco", Font.BOLD, 13));
+            StdDraw.text(WIDTH / 2.0, HEIGHT + 0.35, hudMessage);
+            hudMessageTimer--;
         }
-        StdDraw.textLeft(WIDTH - 35, HEIGHT + HUD_HEIGHT - 1, "(e)nable invincible mode");
 
+        StdDraw.setPenColor(new Color(70, 105, 145));
+        StdDraw.line(0, HEIGHT, WIDTH, HEIGHT);
 
-        // Display coin
-        StdDraw.setPenColor(Color.YELLOW);
-        StdDraw.textLeft(WIDTH - 20, HEIGHT + HUD_HEIGHT - 1, "Coins: " + player.getMoney());
+        double y = HEIGHT + HUD_HEIGHT - 1;
 
-        //Get the location of the cursor
-        int x = (int) StdDraw.mouseX();
-        int y = (int) StdDraw.mouseY();
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 14));
 
-        if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
-            String desc = tiles[x][y].description();
+        StdDraw.setPenColor(frost);
+        StdDraw.textLeft(1, y, "HP");
 
-            StdDraw.setPenColor(Color.WHITE);
-            StdDraw.textLeft(WIDTH - 8, HEIGHT + HUD_HEIGHT - 1, desc);
-        }
-    }
-
-    private static void drawPlayerStatus(Player player) {
-        drawHearts(player);
-        //Ambitious Features:
-    }
-
-    private static void drawHearts(Player player) {
         int hp = player.getHealth();
         int maxHp = player.getMaxHP();
 
-        double startX = 2;
-        double y = HEIGHT + HUD_HEIGHT - 1;
-
         for (int i = 0; i < maxHp; i++) {
             if (i < hp) {
-                StdDraw.setPenColor(Color.RED);
+                StdDraw.setPenColor(danger);
             } else {
-                StdDraw.setPenColor(Color.DARK_GRAY);
+                StdDraw.setPenColor(dim);
             }
-
-            StdDraw.textLeft(startX + i * 1.2, y, "❤");
+            StdDraw.textLeft(4 + i * 1.2, y, "♥");
         }
+
+        StdDraw.setPenColor(gold);
+        StdDraw.textLeft(15, y, "Coins " + player.getMoney());
+
+        if (player.isInvincible()) {
+            StdDraw.setPenColor(new Color(120, 255, 220));
+            StdDraw.textLeft(28, y, "Mode AURORA");
+        } else {
+            StdDraw.setPenColor(ice);
+            StdDraw.textLeft(28, y, "Mode MORTAL");
+        }
+
+        StdDraw.setPenColor(new Color(255, 240, 170));
+        StdDraw.textLeft(45, y, "[E] Aura");
+
+        int x = (int) StdDraw.mouseX();
+        int yy = (int) StdDraw.mouseY();
+
+        if (x >= 0 && x < WIDTH && yy >= 0 && yy < HEIGHT) {
+            String desc = tiles[x][yy].description();
+
+            StdDraw.setPenColor(frost);
+            StdDraw.textRight(WIDTH - 1, y, "Tile " + desc);
+        }
+    }
+
+    private static void showHudMessage(String message) {
+        hudMessage = message;
+        hudMessageTimer = 80;
     }
 
     private static List<Position> findPathBFS (World world, Position start, Position end) {
@@ -750,14 +820,29 @@ public class Main {
             player.setStandingOn(nextTile);
             if (nextTile == Tileset.ENEMY) {
                 player.deductHealth(1);
+                showHudMessage("Smashed an enemy");
                 world.removeEnemyAt(nextStep);
             } else if (nextTile == Tileset.TRAP) {
+                showHudMessage("Ouch!");
                 player.deductHealth(1);
-            } else if (nextTile == Tileset.FLOWER) {
+            } else if (nextTile == Tileset.HEAL) {
                 new HealingItem(1).interact(player);
+                showHudMessage("Warmth restored");
             } else if (nextTile == Tileset.UNLOCKED_DOOR) {
                 new Coin(1).interact(player);
+                showHudMessage("+1 coin");
             }
+
+            //If the player somehow win or lose during the following bath
+            //Return to make sure the player follow the game flow
+            if (player.getHealth() <= 0) {
+                return;
+            }
+
+            if (world.countCoins() == 0) {
+                return;
+            }
+
 
             if (nextTile == Tileset.TRAP) {
                 player.setStandingOn(Tileset.TRAP);
@@ -807,22 +892,37 @@ public class Main {
         double centerX = WIDTH / 2.0;
         double centerY = HEIGHT / 2.0;
 
-        StdDraw.clear(new Color(10, 25, 10));
+        Color bg = new Color(6, 16, 28);
+        Color ice = new Color(145, 205, 225);
+        Color frost = new Color(190, 240, 255);
+        Color gold = new Color(255, 220, 105);
 
-        StdDraw.setPenColor(new Color(255, 215, 0));
-        StdDraw.rectangle(centerX, centerY, WIDTH * 0.4, HEIGHT * 0.35);
+        StdDraw.clear(bg);
 
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 70));
+        StdDraw.setPenColor(new Color(18, 42, 62));
+        StdDraw.filledRectangle(centerX, centerY, WIDTH * 0.42, HEIGHT * 0.34);
+
+        StdDraw.setPenColor(ice);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.42, HEIGHT * 0.34);
+
+        StdDraw.setPenColor(new Color(70, 105, 145));
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.39, HEIGHT * 0.30);
+
+        StdDraw.setPenColor(gold);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 64));
         StdDraw.text(centerX, centerY + 12, "★");
 
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
-        StdDraw.text(centerX, centerY + 4, "YOU WIN!");
+        StdDraw.setPenColor(frost);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 38));
+        StdDraw.text(centerX, centerY + 5, "TREASURE CLAIMED");
 
-        StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
-        StdDraw.text(centerX, centerY - 2, "All coins collected. Legend!");
+        StdDraw.setPenColor(ice);
+        StdDraw.setFont(new Font("Monaco", Font.ITALIC, 17));
+        StdDraw.text(centerX, centerY, "The ice vault falls silent.");
 
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
-        StdDraw.text(centerX, centerY - 8, "Press R to restart, M for menu, Q to quit");
+        StdDraw.setPenColor(new Color(255, 235, 160));
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 16));
+        StdDraw.text(centerX, centerY - 8, "R  checkpoint    M  menu    Q  quit");
 
         StdDraw.show();
 
@@ -842,22 +942,38 @@ public class Main {
         double centerX = WIDTH / 2.0;
         double centerY = HEIGHT / 2.0;
 
-        StdDraw.clear(new Color(15, 0, 0));
+        Color bg = new Color(6, 16, 28);
+        Color ice = new Color(70, 105, 145);
+        Color frost = new Color(145, 205, 225);
+        Color danger = new Color(255, 95, 135);
+        Color dim = new Color(18, 30, 45);
 
-        StdDraw.setPenColor(Color.RED);
-        StdDraw.rectangle(centerX, centerY, WIDTH * 0.4, HEIGHT * 0.35);
+        StdDraw.clear(bg);
 
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 70));
-        StdDraw.text(centerX, centerY + 12, "☠");
+        StdDraw.setPenColor(dim);
+        StdDraw.filledRectangle(centerX, centerY, WIDTH * 0.42, HEIGHT * 0.34);
 
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
-        StdDraw.text(centerX, centerY + 4, "YOU DIED");
+        StdDraw.setPenColor(ice);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.42, HEIGHT * 0.34);
 
-        StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
-        StdDraw.text(centerX, centerY - 2, "The dungeon claims another soul...");
+        StdDraw.setPenColor(new Color(255, 95, 135));
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.39, HEIGHT * 0.30);
 
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
-        StdDraw.text(centerX, centerY - 8, "Press R to restart, M for menu, Q to quit");
+        StdDraw.setPenColor(danger);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 60));
+        StdDraw.text(centerX, centerY + 12, "✦");
+
+        StdDraw.setPenColor(new Color(255, 150, 180));
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 38));
+        StdDraw.text(centerX, centerY + 5, "FROZEN OUT");
+
+        StdDraw.setPenColor(frost);
+        StdDraw.setFont(new Font("Monaco", Font.ITALIC, 17));
+        StdDraw.text(centerX, centerY, "The cold takes hold.");
+
+        StdDraw.setPenColor(new Color(190, 240, 255));
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 16));
+        StdDraw.text(centerX, centerY - 8, "R  checkpoint    M  menu    Q  quit");
 
         StdDraw.show();
 

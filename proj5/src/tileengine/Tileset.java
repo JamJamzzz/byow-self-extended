@@ -17,29 +17,30 @@ import java.awt.Color;
  */
 
 public class Tileset {
-    public static final TETile AVATAR = new TETile('@', Color.white, Color.black, "you", 0);
-    public static final TETile WALL = new TETile('#', new Color(216, 128, 128), Color.darkGray,
+    public static final TETile AVATAR = new TETile('@', new Color(125, 190, 215), new Color(6, 16, 28), "mortal", 0);
+    public static final TETile AURORA = new TETile('♛', new Color(255, 215, 95), new Color(6, 16, 28), "aurora", 0);
+    public static final TETile WALL = new TETile('#', new Color(70, 105, 145), new Color(12, 24, 40),
             "wall", 1);
-    public static final TETile FLOOR = new TETile('·', new Color(128, 192, 128), Color.black, "floor", 2);
-    public static final TETile NOTHING = new TETile(' ', Color.black, Color.black, "nothing", 3);
-    public static final TETile GRASS = new TETile('"', Color.green, Color.black, "grass", 4);
+    public static final TETile FLOOR = new TETile('·', new Color(125, 190, 215), new Color(6, 16, 28), "floor", 2);
+    public static final TETile NOTHING = new TETile('·', new Color(18, 38, 58), new Color(3, 8, 16), "void", 3);
+    public static final TETile GRASS = new TETile('"', new Color(190, 240, 255), new Color(6, 16, 28), "grass", 4);
     public static final TETile WATER = new TETile('≈', Color.blue, Color.black, "water", 5);
-    public static final TETile FLOWER = new TETile('❀', Color.magenta, Color.pink, "flower", 6);
+    public static final TETile HEAL = new TETile('♥', new Color(100, 255, 185), new Color(6, 16, 28), "healing item", 6);
     public static final TETile LOCKED_DOOR = new TETile('█', Color.orange, Color.black,
             "locked door", 7);
-    public static final TETile UNLOCKED_DOOR = new TETile('▢', Color.orange, Color.black,
+    public static final TETile UNLOCKED_DOOR = new TETile('◉', new Color(245, 190, 60), new Color(6, 16, 28),
             "unlocked door", 8);
     public static final TETile SAND = new TETile('▒', Color.yellow, Color.black, "sand", 9);
     public static final TETile MOUNTAIN = new TETile('▲', Color.gray, Color.black, "mountain", 10);
     public static final TETile TREE = new TETile('♠', Color.green, Color.black, "tree", 11);
 
     public static final TETile CELL = new TETile('█', Color.white, Color.black, "cell", 12);
-    public static final TETile ENEMY = new TETile('@', Color.RED, Color.black, "enemy", 13);
-    public static final TETile TRAP = new TETile('❀', Color.RED, Color.BLACK, "flower", 14);
-    public static final TETile ATTACK_UP = new TETile('^', Color.white, Color.black, "attack up", 15);
-    public static final TETile ATTACK_DOWN = new TETile('v', Color.white, Color.black, "attack down", 16);
-    public static final TETile ATTACK_LEFT = new TETile('(', Color.white, Color.black, "attack left", 17);
-    public static final TETile ATTACK_RIGHT = new TETile(')', Color.white, Color.black, "attack right", 18);
+    public static final TETile ENEMY = new TETile('♆', new Color(205, 95, 255), new Color(6, 16, 28), "enemy", 13);
+    public static final TETile TRAP = new TETile('✿', new Color(255, 95, 150), new Color(6, 16, 28), "trap", 14);
+    public static final TETile ATTACK_UP = new TETile('^', new Color(255, 240, 170), new Color(6, 16, 28), "attack up", 15);
+    public static final TETile ATTACK_DOWN = new TETile('v', new Color(255, 240, 170), new Color(6, 16, 28), "attack down", 16);
+    public static final TETile ATTACK_LEFT = new TETile('(', new Color(255, 240, 170), new Color(6, 16, 28), "attack left", 17);
+    public static final TETile ATTACK_RIGHT = new TETile(')', new Color(255, 240, 170), new Color(6, 16, 28), "attack right", 18);
 }
 
 

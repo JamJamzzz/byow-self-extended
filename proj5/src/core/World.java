@@ -416,7 +416,7 @@ public class World {
     public void placeEnemy() {
         enemies = new ArrayList<>();
         for (Room room : allRooms) {
-            int enemyCount = Math.max(1, room.w * room.h / 40);
+            int enemyCount = Math.max(2, room.w * room.h / 45);
 
             for (int i = 0; i < enemyCount; i++) {
                 placeEnemyInRooms(room);
@@ -438,7 +438,7 @@ public class World {
     public void placeTrap() {
         traps = new ArrayList<>();
         for (Room room : allRooms) {
-            int trapCount = Math.max(1, room.w * room.h / 50);
+            int trapCount = Math.max(1, room.w * room.h / 65);
 
             for (int i = 0; i < trapCount; i++) {
                 placeTrapInRooms(room);
@@ -610,12 +610,12 @@ public class World {
 
     public void placeHealingItems() {
         for (Room room : allRooms) {
-            int healCount = Math.max(1, room.w * room.h / 60);
+            int healCount = random.nextBoolean() ? 1 : 0;
             for (int i = 0; i < healCount; i++) {
                 int x = random.nextInt(room.w - 2) + room.x + 1;
                 int y = random.nextInt(room.h - 2) + room.y + 1;
                 if (grid[x][y] == Tileset.FLOOR) {
-                    grid[x][y] = Tileset.FLOWER;
+                    grid[x][y] = Tileset.HEAL;
                 }
             }
         }
@@ -623,7 +623,7 @@ public class World {
 
     public void placeCoins() {
         for (Room room : allRooms) {
-            int coinCount = Math.max(1, room.w * room.h / 50);
+            int coinCount = Math.max(1, room.w * room.h / 45);
 
             for (int i = 0; i < coinCount; i++) {
                 int x = random.nextInt(room.w - 2) + room.x + 1;

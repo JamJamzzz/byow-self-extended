@@ -240,12 +240,14 @@ public class Main {
                 world.restoreCheckpoint();
                 playerMoveCount = 0;
                 canMove = false;
+                inputHistory = new StringBuilder(history.substring(0, i + 1));
             }
 
             if (world.countCoins() == 0) {
                 world.restoreCheckpoint();
                 playerMoveCount = 0;
                 canMove = false;
+                inputHistory = new StringBuilder(history.substring(0, i + 1));
             }
 
             //Attack
@@ -278,11 +280,11 @@ public class Main {
                             if (original == Tileset.TRAP) {
                                 player.deductHealth(1);
                             }
-
                             if (player.getHealth() <= 0) {
                                 world.restoreCheckpoint();
                                 playerMoveCount = 0;
                                 canMove = false;
+                                inputHistory = new StringBuilder(history.substring(0, i + 1));
                             }
                         }
                     }
@@ -354,20 +356,6 @@ public class Main {
 
         TETile nextTile = grid[newX][newY];
 
-        if (nextTile == Tileset.ENEMY) {
-            player.deductHealth(1);
-            world.removeEnemyAt(next);
-            nextTile = Tileset.FLOOR;
-        } else if (nextTile == Tileset.TRAP) {
-            player.deductHealth(1);
-        } else if (nextTile == Tileset.FLOWER) {
-            new HealingItem(1).interact(player);
-            nextTile = Tileset.FLOOR;
-        } else if (nextTile == Tileset.UNLOCKED_DOOR) {
-            new Coin(1).interact(player);
-            nextTile = Tileset.FLOOR;
-        }
-
         //Interaction
         if (nextTile == Tileset.ENEMY) {
             player.deductHealth(1);
@@ -384,7 +372,10 @@ public class Main {
             Coin coin = new Coin(1);
             coin.interact(player);
             player.setStandingOn(Tileset.FLOOR);
+        }else{
+            player.setStandingOn(Tileset.FLOOR);
         }
+
         grid[old.x][old.y] = player.getStandingOn();
         grid[next.x][next.y] = player.getAvator();
         player.setPosition(next);
@@ -741,39 +732,36 @@ public class Main {
             inputHistory.append(move);
 
             world.saveCheckpointIfLeavingRoom(oldStep, nextStep);
-            grid[oldStep.x][oldStep.y] = player.getStandingOn();
+
             TETile nextTile = grid[nextStep.x][nextStep.y];
+
+            grid[oldStep.x][oldStep.y] = player.getStandingOn();
+
             player.setStandingOn(nextTile);
             if (nextTile == Tileset.ENEMY) {
                 player.deductHealth(1);
-                player.setStandingOn(Tileset.FLOOR);
+                world.removeEnemyAt(nextStep);
+            } else if (nextTile == Tileset.TRAP) {
+                player.deductHealth(1);
+            } else if (nextTile == Tileset.FLOWER) {
+                new HealingItem(1).interact(player);
+            } else if (nextTile == Tileset.UNLOCKED_DOOR) {
+                new Coin(1).interact(player);
             }
 
             if (nextTile == Tileset.TRAP) {
-                player.deductHealth(1);
-            }
-
-            if (nextTile == Tileset.FLOWER) {
-                HealingItem heal = new HealingItem(1);
-                heal.interact(player);
+                player.setStandingOn(Tileset.TRAP);
+            } else {
                 player.setStandingOn(Tileset.FLOOR);
             }
 
-            if (nextTile == Tileset.UNLOCKED_DOOR) {
-                Coin coin = new Coin(1);
-                coin.interact(player);
-                player.setStandingOn(Tileset.FLOOR);
-            }
-
-            //Place the new position
             grid[nextStep.x][nextStep.y] = player.getAvator();
-            //Update the current position
             player.setPosition(nextStep);
+
             playerMoveCount++;
             if (playerMoveCount % ENEMY_MOVE_INTERVAL == 0 && canMove) {
                 world.moveEnemies();
             }
-
             if (playerMoveCount % 5 == 0 && canMove) {
                 world.moveTraps();
             }
@@ -781,7 +769,9 @@ public class Main {
             ter.drawTiles(grid);
             StdDraw.show();
         }
-        player.setStandingOn(Tileset.FLOOR);
+        if (player.getStandingOn() != Tileset.TRAP) {
+            player.setStandingOn(Tileset.FLOOR);
+        }
         canMove = false;
     }
 

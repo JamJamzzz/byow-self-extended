@@ -17,7 +17,7 @@ public class Main {
      * World Parameters
      **/
     private static final int WIDTH = 80;
-    private static final int HEIGHT = 60;
+    private static final int HEIGHT = 50;
     private static final int CHUNK_ROWS = 4;
     private static final int CHUNK_COLS = 4;
 
@@ -67,34 +67,41 @@ public class Main {
     }
 
     private static void initialize() {
-        StdDraw.setCanvasSize(800, 600);
-        StdDraw.setXscale(0, 800);
-        StdDraw.setYscale(0, 600);
+        int canvasWidth = WIDTH * 12;
+        int canvasHeight = (HEIGHT + HUD_HEIGHT) * 12;
+
+        StdDraw.setCanvasSize(canvasWidth, canvasHeight);
+        StdDraw.setXscale(0, WIDTH);
+        StdDraw.setYscale(0, HEIGHT + HUD_HEIGHT);
+
         StdDraw.clear();
         //Enable the buffer to carry the double
         StdDraw.enableDoubleBuffering();
     }
 
     private static void draw() {
+        double centerX = WIDTH / 2.0;
+        double centerY = HEIGHT / 2.0;
+
         StdDraw.clear(new Color(15, 15, 30));
 
         StdDraw.setPenColor(new Color(255, 215, 0));
-        StdDraw.rectangle(400, 300, 360, 260);
-        StdDraw.rectangle(400, 300, 355, 255);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.45, HEIGHT * 0.40);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.44, HEIGHT * 0.39);
 
         StdDraw.setPenColor(Color.WHITE);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 48));
-        StdDraw.text(400, 470, "CS61B: BYOW");
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
+        StdDraw.text(centerX, centerY + 12, "CS61B: BYOW");
 
         StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
-        StdDraw.text(400, 420, "Dungeon Adventure");
+        StdDraw.text(centerX, centerY + 6, "Dungeon Adventure");
 
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 24));
-        StdDraw.text(400, 320, "(N) New Game");
-        StdDraw.text(400, 270, "(L) Load Game");
-        StdDraw.text(400, 220, "(Q) Quit Game");
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 22));
+        StdDraw.text(centerX, centerY + 1, "(N) New Game");
+        StdDraw.text(centerX, centerY - 4, "(L) Load Game");
+        StdDraw.text(centerX, centerY - 9, "(Q) Quit Game");
 
-        StdDraw.line(250, 380, 550, 380);
+        StdDraw.line(centerX - 15, centerY + 3, centerX + 15, centerY + 3);
 
         StdDraw.show();
     }
@@ -125,18 +132,21 @@ public class Main {
     }
 
     private static void drawSeed(String seed) {
-        StdDraw.clear(Color.black);
+        double centerX = WIDTH / 2.0;
+        double centerY = HEIGHT / 2.0;
+
+        StdDraw.clear(Color.BLACK);
 
         StdDraw.setPenColor(Color.WHITE);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
-        StdDraw.text(400, 450, "CS61B:  BYOW");
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 36));
+        StdDraw.text(centerX, centerY + 10, "CS61B: BYOW");
 
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 350, "Enter seed followed by S");
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
+        StdDraw.text(centerX, centerY + 2, "Enter seed followed by S");
 
         StdDraw.setPenColor(Color.YELLOW);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 25));
-        StdDraw.text(400, 250, seed);
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 24));
+        StdDraw.text(centerX, centerY - 6, seed);
 
         StdDraw.show();
     }
@@ -792,31 +802,27 @@ public class Main {
     }
 
     private static char showVictory() {
-        StdDraw.setCanvasSize(800, 600);
-        StdDraw.setXscale(0, 800);
-        StdDraw.setYscale(0, 600);
+        initialize();
+
+        double centerX = WIDTH / 2.0;
+        double centerY = HEIGHT / 2.0;
 
         StdDraw.clear(new Color(10, 25, 10));
 
         StdDraw.setPenColor(new Color(255, 215, 0));
-        StdDraw.rectangle(400, 300, 350, 250);
-        StdDraw.rectangle(400, 300, 340, 240);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.4, HEIGHT * 0.35);
 
-        StdDraw.setPenColor(new Color(255, 215, 0));
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 80));
-        StdDraw.text(400, 430, "★");
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 70));
+        StdDraw.text(centerX, centerY + 12, "★");
 
-        StdDraw.setPenColor(new Color(255, 215, 0));
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 50));
-        StdDraw.text(400, 340, "YOU WIN!");
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
+        StdDraw.text(centerX, centerY + 4, "YOU WIN!");
 
-        StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
-        StdDraw.text(400, 280, "All coins collected. Legend!");
+        StdDraw.text(centerX, centerY - 2, "All coins collected. Legend!");
 
-        StdDraw.setPenColor(Color.WHITE);
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 220, "Press R to restart, M for menu, Q to quit");
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
+        StdDraw.text(centerX, centerY - 8, "Press R to restart, M for menu, Q to quit");
 
         StdDraw.show();
 
@@ -831,31 +837,27 @@ public class Main {
     }
 
     private static char showGameOver() {
-        StdDraw.setCanvasSize(800, 600);
-        StdDraw.setXscale(0, 800);
-        StdDraw.setYscale(0, 600);
+        initialize();
+
+        double centerX = WIDTH / 2.0;
+        double centerY = HEIGHT / 2.0;
 
         StdDraw.clear(new Color(15, 0, 0));
-        StdDraw.text(400, 180, "Press R to retry");
 
         StdDraw.setPenColor(Color.RED);
-        StdDraw.rectangle(400, 300, 350, 250);
+        StdDraw.rectangle(centerX, centerY, WIDTH * 0.4, HEIGHT * 0.35);
 
-        StdDraw.setPenColor(Color.RED);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 80));
-        StdDraw.text(400, 430, "☠");
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 70));
+        StdDraw.text(centerX, centerY + 12, "☠");
 
-        StdDraw.setPenColor(Color.RED);
-        StdDraw.setFont(new Font("Monaco", Font.BOLD, 50));
-        StdDraw.text(400, 340, "YOU DIED");
+        StdDraw.setFont(new Font("Monaco", Font.BOLD, 40));
+        StdDraw.text(centerX, centerY + 4, "YOU DIED");
 
-        StdDraw.setPenColor(new Color(200, 200, 200));
         StdDraw.setFont(new Font("Monaco", Font.ITALIC, 18));
-        StdDraw.text(400, 280, "The dungeon claims another soul...");
+        StdDraw.text(centerX, centerY - 2, "The dungeon claims another soul...");
 
-        StdDraw.setPenColor(Color.WHITE);
-        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 20));
-        StdDraw.text(400, 220, "Press R to restart, M for menu, Q to quit");
+        StdDraw.setFont(new Font("Monaco", Font.PLAIN, 18));
+        StdDraw.text(centerX, centerY - 8, "Press R to restart, M for menu, Q to quit");
 
         StdDraw.show();
 

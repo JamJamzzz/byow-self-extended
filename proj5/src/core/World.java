@@ -13,10 +13,10 @@ public class World {
     private final int CHUNK_ROWS;
     private final int CHUNK_COLS;
 
-    private final int MIN_ROOM_W = 5;
-    private final int MAX_ROOM_W = 12;
-    private final int MIN_ROOM_H = 5;
-    private final int MAX_ROOM_H = 12;
+    private final int MIN_ROOM_W;
+    private final int MAX_ROOM_W;
+    private final int MIN_ROOM_H;
+    private final int MAX_ROOM_H;
 
     private final int MIN_ROOM_NUM = 1;
     private final int MAX_ROOM_NUM = 1;
@@ -42,8 +42,8 @@ public class World {
     /** Constructor **/
     public World(int width, int height, int chunkRows, int chunkCols, long seed) {
         //To prevent the user add oversize chunkCols and chunkRows, get the minChunkWidth and minChunkHeight
-        int minChunkWidth = MIN_ROOM_W + 2;
-        int minChunkHeight = MIN_ROOM_H + 2;
+        int minChunkWidth = 5 + 2;
+        int minChunkHeight = 5 + 2;
 
         //Set the minimum world width and height based on chunk
         int minWorldWidth = 2 * minChunkWidth;
@@ -51,6 +51,12 @@ public class World {
 
         this.WIDTH = Math.max(width, minWorldWidth);
         this.HEIGHT = Math.max(height, minWorldHeight);
+
+        this.MIN_ROOM_W = Math.max(4, this.WIDTH / 20);
+        this.MAX_ROOM_W = Math.max(8, this.WIDTH / 10);
+
+        this.MIN_ROOM_H = Math.max(4, this.HEIGHT / 20);
+        this.MAX_ROOM_H = Math.max(8, this.HEIGHT / 10);
 
         this.CHUNK_COLS = Math.max(2, Math.min(chunkCols, WIDTH / minChunkWidth));
         this.CHUNK_ROWS = Math.max(2, Math.min(chunkRows, HEIGHT / minChunkHeight));
@@ -142,7 +148,9 @@ public class World {
     private void generateRooms() {
         allRooms = new ArrayList<>();
 
-        int targetRooms = random.nextInt(6) + 8;
+
+        int area = WIDTH * HEIGHT;
+        int targetRooms = Math.max(5, area / 500);
         int attempts = 0;
 
         while (allRooms.size() < targetRooms && attempts < 200) {
@@ -408,7 +416,7 @@ public class World {
     public void placeEnemy() {
         enemies = new ArrayList<>();
         for (Room room : allRooms) {
-            int enemyCount = random.nextInt(3); // 0,1,2
+            int enemyCount = Math.max(1, room.w * room.h / 40);
 
             for (int i = 0; i < enemyCount; i++) {
                 placeEnemyInRooms(room);
@@ -430,9 +438,9 @@ public class World {
     public void placeTrap() {
         traps = new ArrayList<>();
         for (Room room : allRooms) {
-            int enemyCount = random.nextInt(3); // 0,1,2
+            int trapCount = Math.max(1, room.w * room.h / 50);
 
-            for (int i = 0; i < enemyCount; i++) {
+            for (int i = 0; i < trapCount; i++) {
                 placeTrapInRooms(room);
             }
         }
@@ -602,7 +610,7 @@ public class World {
 
     public void placeHealingItems() {
         for (Room room : allRooms) {
-            int healCount = random.nextInt(2) + 1;
+            int healCount = Math.max(1, room.w * room.h / 60);
             for (int i = 0; i < healCount; i++) {
                 int x = random.nextInt(room.w - 2) + room.x + 1;
                 int y = random.nextInt(room.h - 2) + room.y + 1;
@@ -615,7 +623,7 @@ public class World {
 
     public void placeCoins() {
         for (Room room : allRooms) {
-            int coinCount = random.nextInt(3) + 1;
+            int coinCount = Math.max(1, room.w * room.h / 50);
 
             for (int i = 0; i < coinCount; i++) {
                 int x = random.nextInt(room.w - 2) + room.x + 1;

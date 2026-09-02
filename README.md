@@ -1,10 +1,11 @@
 # BYOW Self-Extended
 
-An independently extended version of the UC Berkeley CS 61B "Build Your Own World" (BYOW) project. The
-CS 61B-provided pieces are the tile engine (`tileengine/`) and course utility libraries
-(`utils/`, `library-sp26/`); everything else -- chunk-based procedural generation, the Prim
-minimum-spanning-tree connectivity algorithm, the checkpoint/replay system, BFS click-to-move, and the
-test/verification suite -- was designed and written independently on top of that scaffold.
+This repository contains my independently extended version of UC Berkeley CS 61B BYOW, with custom
+chunk-based generation, graph connectivity, checkpoint/replay, pathfinding, and verification work built
+on the course scaffold. The CS 61B-provided pieces are the tile engine (`tileengine/`) and course utility
+libraries (`utils/`, `library-sp26/`); the chunk-based procedural generation, the Prim minimum-spanning-tree
+connectivity algorithm, the checkpoint/replay system, BFS click-to-move, and the test/verification suite
+are the custom work built on top of that scaffold.
 
 All source lives under [`proj5/`](proj5/).
 

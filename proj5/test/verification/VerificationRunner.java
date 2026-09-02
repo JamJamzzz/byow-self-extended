@@ -52,10 +52,17 @@ public final class VerificationRunner {
         Path evidenceDir = Path.of("evidence");
         Files.createDirectories(evidenceDir);
 
-        boolean generationOk = runGroup(
-                "generation", GENERATION_SUITES, evidenceDir.resolve("byow-generation-verification.json"));
-        boolean replayOk = runGroup(
-                "replay_state", REPLAY_STATE_SUITES, evidenceDir.resolve("byow-replay-verification.json"));
+        // Captured exactly once, before either evidence file is written: writing
+        // the first artifact mutates the working tree, which would otherwise make
+        // gitDirty() report a false "dirty" for whichever group runs second. Both
+        // artifacts must describe the same tested source state.
+        String testedCommit = gitCommit();
+        boolean testedWorktreeDirty = gitDirty();
+
+        boolean generationOk = runGroup("generation", GENERATION_SUITES,
+                evidenceDir.resolve("byow-generation-verification.json"), testedCommit, testedWorktreeDirty);
+        boolean replayOk = runGroup("replay_state", REPLAY_STATE_SUITES,
+                evidenceDir.resolve("byow-replay-verification.json"), testedCommit, testedWorktreeDirty);
 
         if (!generationOk || !replayOk) {
             System.err.println("VerificationRunner: at least one suite group failed; see evidence JSON for details.");
@@ -63,7 +70,8 @@ public final class VerificationRunner {
         }
     }
 
-    private static boolean runGroup(String suiteGroup, Class<?>[] classes, Path outputPath) throws IOException {
+    private static boolean runGroup(String suiteGroup, Class<?>[] classes, Path outputPath,
+                                     String testedCommit, boolean testedWorktreeDirty) throws IOException {
         JUnitCore core = new JUnitCore();
         long startNanos = System.nanoTime();
         Result result = core.run(classes);
@@ -72,8 +80,8 @@ public final class VerificationRunner {
         JsonObject json = new JsonObject();
         json.addProperty("schema_version", 1);
         json.addProperty("generated_at", Instant.now().toString());
-        json.addProperty("git_commit", gitCommit());
-        json.addProperty("git_dirty", gitDirty());
+        json.addProperty("tested_commit", testedCommit);
+        json.addProperty("tested_worktree_dirty", testedWorktreeDirty);
         json.addProperty("suite_group", suiteGroup);
         json.addProperty("command_or_runner", "verification.VerificationRunner -> org.junit.runner.JUnitCore.run("
                 + classNames(classes) + ")");
@@ -182,11 +190,13 @@ public final class VerificationRunner {
         return String.join(", ", names);
     }
 
+    /** The commit this verification run is testing. Call once, before any evidence file is written. */
     private static String gitCommit() {
         String sha = runGit("rev-parse", "HEAD");
         return sha != null ? sha.trim() : "unknown";
     }
 
+    /** Whether the working tree had uncommitted changes at the moment this run started. */
     private static boolean gitDirty() {
         String status = runGit("status", "--porcelain");
         return status != null && !status.trim().isEmpty();

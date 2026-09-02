@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-02T13:57:56.714511400Z",
-  "git_commit": "f06d33d76ae6210408f5f90d389e2999e3217a09",
-  "git_dirty": true,
+  "generated_at": "2026-09-02T14:09:33.030809100Z",
+  "tested_commit": "90d6393952c01833eedff3a32705c53bb210bc33",
+  "tested_worktree_dirty": false,
   "suite_group": "replay_state",
   "command_or_runner": "verification.VerificationRunner -\u003e org.junit.runner.JUnitCore.run(core.ReplayEquivalenceTest, core.BfsPathfinderTest, core.PositionTest, core.CheckpointTest, core.EngineSchedulingCheckpointTest, core.CheckpointFutureEquivalenceTest)",
   "junit": {
     "run_count": 18,
     "failure_count": 0,
     "ignored_count": 0,
-    "runtime_ms": 292
+    "runtime_ms": 266
   },
   "verification": [
     {

@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-02T13:57:56.262683600Z",
-  "git_commit": "f06d33d76ae6210408f5f90d389e2999e3217a09",
-  "git_dirty": true,
+  "generated_at": "2026-09-02T14:09:32.722394200Z",
+  "tested_commit": "90d6393952c01833eedff3a32705c53bb210bc33",
+  "tested_worktree_dirty": false,
   "suite_group": "generation",
   "command_or_runner": "verification.VerificationRunner -\u003e org.junit.runner.JUnitCore.run(core.gen.PrimMstInvariantsTest, core.gen.PrimIsMinimumSpanningTreeTest, core.gen.DeterminismTest, core.gen.WorldConnectivityTest)",
   "junit": {
     "run_count": 5,
     "failure_count": 0,
     "ignored_count": 0,
-    "runtime_ms": 839
+    "runtime_ms": 840
   },
   "verification": [
     {

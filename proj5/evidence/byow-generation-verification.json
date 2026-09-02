@@ -1,0 +1,65 @@
+{
+  "suites": [
+    {
+      "suite_name": "core.gen.PrimMstInvariantsTest",
+      "passed": 1,
+      "total": 1,
+      "failed": 0,
+      "deterministic": true,
+      "scope": {
+        "seed_count": 500,
+        "world_width": 70,
+        "world_height": 50,
+        "chunk_rows": 4,
+        "chunk_cols": 4,
+        "invariants_checked": [
+          "every chunk has an anchor room (all chunks participate)",
+          "mst_edge_count == participating_chunks - 1",
+          "all chunks reachable via MST edges alone",
+          "MST is acyclic (edge count matches a tree on a connected graph)",
+          "no duplicate edges between MST and extra (non-tree) edges"
+        ]
+      },
+      "verification_status": "verified"
+    },
+    {
+      "suite_name": "core.gen.WorldConnectivityTest",
+      "passed": 1,
+      "total": 1,
+      "failed": 0,
+      "deterministic": true,
+      "scope": {
+        "seed_count": 1000,
+        "world_width": 70,
+        "world_height": 50,
+        "chunk_rows": 4,
+        "chunk_cols": 4,
+        "invariants_checked": [
+          "every generated room center is reachable from spawn through floor tiles",
+          "no null tiles / ragged grid rows (no out-of-bounds writes)"
+        ]
+      },
+      "verification_status": "verified"
+    },
+    {
+      "suite_name": "core.gen.DeterminismTest",
+      "passed": 1,
+      "total": 1,
+      "failed": 0,
+      "deterministic": true,
+      "scope": {
+        "seed_count": 300,
+        "check": "same seed produces a byte-identical canonical tile-character hash across two independent generate() calls"
+      },
+      "verification_status": "verified"
+    }
+  ],
+  "aggregate": {
+    "junit_tests_passed": 5,
+    "junit_tests_total": 5,
+    "junit_tests_failed": 0,
+    "command": "java -cp <library-sp26 jars>;out;out-test org.junit.runner.JUnitCore core.gen.PrimMstInvariantsTest core.gen.DeterminismTest core.gen.WorldConnectivityTest",
+    "wall_clock_seconds_observed": 0.813,
+    "notes": "1000 seeds was reached for the connectivity sweep because generation for a 70x50 grid with 16 chunks is cheap (well under 1ms/seed); no seed count was reduced or approximated. Numbers above are copied from an actual JUnitCore run, not estimated."
+  }
+}

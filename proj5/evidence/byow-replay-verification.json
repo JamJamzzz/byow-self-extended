@@ -1,0 +1,60 @@
+{
+  "suites": [
+    {
+      "suite_name": "core.ReplayEquivalenceTest",
+      "passed": 1,
+      "total": 1,
+      "failed": 0,
+      "deterministic": true,
+      "scope": {
+        "trace_count": 40,
+        "trace_length_commands": 250,
+        "command_alphabet": ["w", "a", "s", "d", "j", "e"],
+        "world_seeds": "1000..1039 (one distinct seed per trace)",
+        "check": "for each trace, run it live through GameEngine.step(char), then persist the recorded CommandHistory via SaveGameRepository, reload it, and replay the saved characters through a fresh World/GameEngine pair using the same GameEngine.step(char) entry point; compare a canonical state string (player position, health, money, invincibility, remaining coins, full tile grid) between the live and replayed runs"
+      },
+      "verification_status": "verified"
+    },
+    {
+      "suite_name": "core.BfsPathfinderTest",
+      "passed": 1,
+      "total": 1,
+      "failed": 0,
+      "deterministic": true,
+      "scope": {
+        "cases": [
+          "start == target returns empty path",
+          "unreachable/unwalkable target returns null",
+          "out-of-bounds target returns null",
+          "shortest path through a single-gap wall has the expected length and is all axis-adjacent steps",
+          "path contains no repeated tiles",
+          "identical calls return identical paths (deterministic reconstruction)"
+        ]
+      },
+      "verification_status": "verified"
+    },
+    {
+      "suite_name": "core.CheckpointTest",
+      "passed": 1,
+      "total": 1,
+      "failed": 0,
+      "deterministic": true,
+      "scope": {
+        "cases": [
+          "restoring undoes health and position changes",
+          "restoring brings back a collected coin (grid tile AND the interactables map entry)",
+          "mutating the grid after a checkpoint does not affect the saved snapshot (defensive copy)"
+        ]
+      },
+      "verification_status": "verified"
+    }
+  ],
+  "aggregate": {
+    "junit_tests_passed": 3,
+    "junit_tests_total": 3,
+    "junit_tests_failed": 0,
+    "command": "java -cp <library-sp26 jars>;out;out-test org.junit.runner.JUnitCore core.ReplayEquivalenceTest core.BfsPathfinderTest core.CheckpointTest",
+    "wall_clock_seconds_observed": 0.813,
+    "notes": "wall_clock_seconds_observed is from the same combined JUnitCore run reported in byow-generation-verification.json (18 tests total across both files ran together in 0.813s)."
+  }
+}

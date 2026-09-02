@@ -1,37 +1,28 @@
 package core;
 
-import net.sf.saxon.expr.Component;
 import tileengine.TETile;
 import tileengine.Tileset;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
-/** Default Player **/
+/** The player-controlled avatar: health, money, facing direction, and invincibility mode. */
 public class Player {
-    /** Class Attributes **/
-    private final int MAX_HP = 10;
+    private static final int STARTING_HEALTH = 3;
+    private static final int STARTING_MAX_HP = 5;
 
-    /** Player Attributes **/
     private int money;
-    private int MaxHP;
+    private int maxHp;
     private int health;
-    private TETile avator;
+    private TETile avatar;
 
-    /** Player Location **/
     private Position position;
-
-    /** Player Direction **/
     private Direction direction;
-    TETile standingOn;
+    private TETile standingOn;
 
-    /** Invincible!!! **/
-    private boolean invincible = false;
+    private boolean invincible;
 
     public Player() {
-        health = 3;
-        MaxHP = 5;
-        avator = Tileset.AVATAR;
+        health = STARTING_HEALTH;
+        maxHp = STARTING_MAX_HP;
+        avatar = Tileset.AVATAR;
         direction = Direction.UP;
         standingOn = Tileset.FLOOR;
         invincible = false;
@@ -42,7 +33,7 @@ public class Player {
     }
 
     public int getMaxHP() {
-        return MaxHP;
+        return maxHp;
     }
 
     public Position getPosition() {
@@ -53,22 +44,24 @@ public class Player {
         this.position = position;
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
 
     public TETile getAvator() {
-        return avator;
+        return avatar;
     }
 
-    //Ambitious Features:
     public void deductHealth(int damage) {
         if (invincible) {
             return;
         }
-
         health -= damage;
-        health = Math.min(health, MaxHP);
+        health = Math.min(health, maxHp);
     }
 
     public Position attack() {
@@ -91,7 +84,7 @@ public class Player {
             case LEFT: return Tileset.ATTACK_LEFT;
             case RIGHT: return Tileset.ATTACK_RIGHT;
         }
-        return Tileset.CELL; // fallback
+        return Tileset.CELL;
     }
 
     public void setHealth(int health) {
@@ -118,10 +111,6 @@ public class Player {
         standingOn = standing;
     }
 
-    public void death() {
-        ;
-    }
-
     public void setInvincible(boolean invincible) {
         this.invincible = invincible;
     }
@@ -132,10 +121,6 @@ public class Player {
 
     public void toggleInvincible() {
         invincible = !invincible;
-        if (invincible) {
-            avator = Tileset.AURORA;
-        } else {
-            avator = Tileset.AVATAR;
-        }
+        avatar = invincible ? Tileset.AURORA : Tileset.AVATAR;
     }
 }

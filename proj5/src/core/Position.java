@@ -1,8 +1,9 @@
 package core;
 
-public class Position {
-    int x;
-    int y;
+/** Immutable (x, y) grid coordinate. */
+public final class Position {
+    public final int x;
+    public final int y;
 
     public Position(int x, int y) {
         this.x = x;
@@ -14,11 +15,9 @@ public class Position {
         if (this == other) {
             return true;
         }
-
         if (!(other instanceof Position)) {
             return false;
         }
-
         Position posi = (Position) other;
         return this.x == posi.x && this.y == posi.y;
     }
@@ -26,5 +25,10 @@ public class Position {
     @Override
     public int hashCode() {
         return 31 * x + y;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
     }
 }

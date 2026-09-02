@@ -11,7 +11,6 @@ public class Player {
     private int money;
     private int maxHp;
     private int health;
-    private TETile avatar;
 
     private Position position;
     private Direction direction;
@@ -22,7 +21,6 @@ public class Player {
     public Player() {
         health = STARTING_HEALTH;
         maxHp = STARTING_MAX_HP;
-        avatar = Tileset.AVATAR;
         direction = Direction.UP;
         standingOn = Tileset.FLOOR;
         invincible = false;
@@ -52,8 +50,9 @@ public class Player {
         this.direction = direction;
     }
 
-    public TETile getAvator() {
-        return avatar;
+    /** The avatar tile is purely derived from invincibility -- there is no separate stored render mode to drift out of sync. */
+    public TETile getAvatar() {
+        return invincible ? Tileset.AURORA : Tileset.AVATAR;
     }
 
     public void deductHealth(int damage) {
@@ -121,6 +120,5 @@ public class Player {
 
     public void toggleInvincible() {
         invincible = !invincible;
-        avatar = invincible ? Tileset.AURORA : Tileset.AVATAR;
     }
 }

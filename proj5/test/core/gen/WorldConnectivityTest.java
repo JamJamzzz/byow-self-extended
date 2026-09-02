@@ -5,6 +5,7 @@ import core.Room;
 import org.junit.Test;
 import tileengine.TETile;
 import tileengine.Tileset;
+import verification.VerificationConfig;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -20,11 +21,11 @@ import static org.junit.Assert.assertTrue;
  * grid's bounds.
  */
 public class WorldConnectivityTest {
-    private static final int SEED_COUNT = 1000;
-    private static final int WIDTH = 70;
-    private static final int HEIGHT = 50;
-    private static final int CHUNK_ROWS = 4;
-    private static final int CHUNK_COLS = 4;
+    private static final int SEED_COUNT = VerificationConfig.WORLD_CONNECTIVITY_SEED_COUNT;
+    private static final int WIDTH = VerificationConfig.WORLD_WIDTH;
+    private static final int HEIGHT = VerificationConfig.WORLD_HEIGHT;
+    private static final int CHUNK_ROWS = VerificationConfig.CHUNK_ROWS;
+    private static final int CHUNK_COLS = VerificationConfig.CHUNK_COLS;
 
     @Test
     public void everyRoomReachableFromSpawnAcrossManySeeds() {

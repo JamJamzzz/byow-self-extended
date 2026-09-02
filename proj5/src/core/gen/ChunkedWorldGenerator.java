@@ -87,7 +87,7 @@ public final class ChunkedWorldGenerator {
         Room spawnRoom = chunks.get(0).anchorRoom();
         validateConnectivity(grid, spawnRoom, allRooms);
 
-        return new GeneratedWorld(grid, allRooms, chunks, mst.mstEdges, extraEdges, spawnRoom, seed, rng.entities());
+        return new GeneratedWorld(grid, allRooms, chunks, mst.mstEdges, extraEdges, spawnRoom, seed, rng.entitySeed());
     }
 
     private TETile[][] blankGrid() {

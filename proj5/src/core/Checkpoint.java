@@ -8,9 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A defensively-copied snapshot of everything needed to resume play
- * identically: the tile grid, enemy/trap positions, the player's stats,
- * and any interactable items that had not yet been collected.
+ * A defensively-copied snapshot of every piece of logical execution state
+ * that can affect future gameplay: not just the visible tile grid, but the
+ * player's full state (position/health/money/standingOn/direction/
+ * invincibility -- the avatar tile itself is derived, so it is not stored),
+ * the movement-scheduling counter that decides when enemies/traps take
+ * their next turn, and the exact runtime RNG state that will drive their
+ * next moves. Restoring a checkpoint and replaying the same command suffix
+ * must reproduce the same future, not just look the same immediately after
+ * restore -- omitting any of these would let that suffix diverge.
  */
 final class Checkpoint {
     private final TETile[][] grid;
@@ -21,10 +27,15 @@ final class Checkpoint {
     private final int playerHealth;
     private final int playerMoney;
     private final TETile playerStandingOn;
+    private final Direction playerDirection;
+    private final boolean playerInvincible;
+    private final int moveCount;
+    private final long rngState;
 
     Checkpoint(TETile[][] grid, List<Position> enemies, List<Position> traps,
                Map<Position, Interactable> interactables, Position playerPosition,
-               int playerHealth, int playerMoney, TETile playerStandingOn) {
+               int playerHealth, int playerMoney, TETile playerStandingOn,
+               Direction playerDirection, boolean playerInvincible, int moveCount, long rngState) {
         this.grid = TETile.copyOf(grid);
         this.enemies = copyPositions(enemies);
         this.traps = copyPositions(traps);
@@ -33,6 +44,10 @@ final class Checkpoint {
         this.playerHealth = playerHealth;
         this.playerMoney = playerMoney;
         this.playerStandingOn = playerStandingOn;
+        this.playerDirection = playerDirection;
+        this.playerInvincible = playerInvincible;
+        this.moveCount = moveCount;
+        this.rngState = rngState;
     }
 
     private static List<Position> copyPositions(List<Position> positions) {
@@ -73,5 +88,21 @@ final class Checkpoint {
 
     TETile playerStandingOn() {
         return playerStandingOn;
+    }
+
+    Direction playerDirection() {
+        return playerDirection;
+    }
+
+    boolean playerInvincible() {
+        return playerInvincible;
+    }
+
+    int moveCount() {
+        return moveCount;
+    }
+
+    long rngState() {
+        return rngState;
     }
 }

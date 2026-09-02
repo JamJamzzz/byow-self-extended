@@ -1,6 +1,7 @@
 package core;
 
 import org.junit.Test;
+import tileengine.TETile;
 import tileengine.Tileset;
 
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,34 @@ public class CheckpointTest {
         assertTrue(world.restoreCheckpoint());
         assertEquals(before, player.getPosition());
         assertEquals(3, player.getHealth());
+    }
+
+    @Test
+    public void restoringUndoesDirectionMoneyAndInvincibility() {
+        World world = buildWorld(11);
+        Player player = world.getPlayer();
+
+        Direction directionBefore = player.getDirection();
+        boolean invincibleBefore = player.isInvincible();
+        TETile avatarBefore = player.getAvatar();
+
+        world.saveCheckpoint();
+
+        Direction mutatedDirection = directionBefore == Direction.LEFT ? Direction.RIGHT : Direction.LEFT;
+        player.setDirection(mutatedDirection);
+        player.toggleInvincible();
+        player.addMoney(5);
+
+        assertTrue("test setup should actually change direction", player.getDirection() != directionBefore);
+        assertTrue("test setup should actually flip invincibility", invincibleBefore != player.isInvincible());
+
+        assertTrue(world.restoreCheckpoint());
+
+        assertEquals("direction must be restored exactly", directionBefore, player.getDirection());
+        assertEquals("invincibility must be restored exactly", invincibleBefore, player.isInvincible());
+        assertEquals("money must be restored exactly", 0, player.getMoney());
+        assertEquals("avatar tile must be re-derived from the restored invincibility flag, not stored separately",
+                avatarBefore, player.getAvatar());
     }
 
     @Test

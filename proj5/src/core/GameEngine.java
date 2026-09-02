@@ -16,7 +16,6 @@ public final class GameEngine {
 
     private final World world;
     private final Player player;
-    private int moveCount = 0;
 
     public GameEngine(World world) {
         this.world = world;
@@ -53,13 +52,14 @@ public final class GameEngine {
         }
     }
 
-    /** Restores the last checkpoint and resets the move counter, mirroring what a fresh run/replay start looks like. */
+    /**
+     * Restores the last checkpoint. World owns every piece of checkpointable
+     * execution state (grid, entities, player, move-scheduling counter,
+     * runtime RNG), so restoring it here is the single call needed for
+     * deterministic continuation from that point.
+     */
     public boolean restoreFromCheckpoint() {
-        boolean restored = world.restoreCheckpoint();
-        if (restored) {
-            moveCount = 0;
-        }
-        return restored;
+        return world.restoreCheckpoint();
     }
 
     private StepResult move(Direction dir) {
@@ -96,11 +96,11 @@ public final class GameEngine {
         }
 
         grid[pos.x][pos.y] = restoreOldTile;
-        grid[next.x][next.y] = player.getAvator();
+        grid[next.x][next.y] = player.getAvatar();
         player.setPosition(next);
         player.setStandingOn(standingOnAtNext);
 
-        moveCount++;
+        int moveCount = world.incrementMoveCount();
         if (moveCount % ENEMY_MOVE_INTERVAL == 0) {
             world.moveEnemies();
         }
@@ -139,7 +139,7 @@ public final class GameEngine {
     private StepResult toggleInvincible() {
         player.toggleInvincible();
         Position p = player.getPosition();
-        world.getGrid()[p.x][p.y] = player.getAvator();
+        world.getGrid()[p.x][p.y] = player.getAvatar();
         String message = player.isInvincible() ? "Aurora awakened" : "Aurora faded";
         return StepResult.of(false, message, false, false, null);
     }

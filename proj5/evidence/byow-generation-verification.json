@@ -1,65 +1,37 @@
 {
-  "suites": [
+  "schema_version": 1,
+  "generated_at": "2026-09-02T13:57:56.262683600Z",
+  "git_commit": "f06d33d76ae6210408f5f90d389e2999e3217a09",
+  "git_dirty": true,
+  "suite_group": "generation",
+  "command_or_runner": "verification.VerificationRunner -\u003e org.junit.runner.JUnitCore.run(core.gen.PrimMstInvariantsTest, core.gen.PrimIsMinimumSpanningTreeTest, core.gen.DeterminismTest, core.gen.WorldConnectivityTest)",
+  "junit": {
+    "run_count": 5,
+    "failure_count": 0,
+    "ignored_count": 0,
+    "runtime_ms": 839
+  },
+  "verification": [
     {
-      "suite_name": "core.gen.PrimMstInvariantsTest",
-      "passed": 1,
-      "total": 1,
-      "failed": 0,
-      "deterministic": true,
-      "scope": {
-        "seed_count": 500,
-        "world_width": 70,
-        "world_height": 50,
-        "chunk_rows": 4,
-        "chunk_cols": 4,
-        "invariants_checked": [
-          "every chunk has an anchor room (all chunks participate)",
-          "mst_edge_count == participating_chunks - 1",
-          "all chunks reachable via MST edges alone",
-          "MST is acyclic (edge count matches a tree on a connected graph)",
-          "no duplicate edges between MST and extra (non-tree) edges"
-        ]
-      },
-      "verification_status": "verified"
+      "name": "core.gen.PrimMstInvariantsTest",
+      "seed_count": 500,
+      "invariant": "N participating chunks -\u003e N-1 MST edges; all chunks reachable via MST edges; MST edge set contains no cycle (independent Union-Find check); no duplicate edges between MST and extra edges"
     },
     {
-      "suite_name": "core.gen.WorldConnectivityTest",
-      "passed": 1,
-      "total": 1,
-      "failed": 0,
-      "deterministic": true,
-      "scope": {
-        "seed_count": 1000,
-        "world_width": 70,
-        "world_height": 50,
-        "chunk_rows": 4,
-        "chunk_cols": 4,
-        "invariants_checked": [
-          "every generated room center is reachable from spawn through floor tiles",
-          "no null tiles / ragged grid rows (no out-of-bounds writes)"
-        ]
-      },
-      "verification_status": "verified"
+      "name": "core.gen.PrimIsMinimumSpanningTreeTest",
+      "seed_count": 1000,
+      "invariant": "sum(Prim MST edge costs) \u003d\u003d sum(independent Kruskal+DSU MST edge costs) over the same candidate chunk-graph edges"
     },
     {
-      "suite_name": "core.gen.DeterminismTest",
-      "passed": 1,
-      "total": 1,
-      "failed": 0,
-      "deterministic": true,
-      "scope": {
-        "seed_count": 300,
-        "check": "same seed produces a byte-identical canonical tile-character hash across two independent generate() calls"
-      },
-      "verification_status": "verified"
+      "name": "core.gen.DeterminismTest",
+      "seed_count": 300,
+      "invariant": "same seed produces a byte-identical canonical tile-character hash across two independent generate() calls"
+    },
+    {
+      "name": "core.gen.WorldConnectivityTest",
+      "seed_count": 1000,
+      "invariant": "every generated room center is reachable from spawn through floor tiles; no null/ragged grid tiles (no out-of-bounds writes)"
     }
   ],
-  "aggregate": {
-    "junit_tests_passed": 5,
-    "junit_tests_total": 5,
-    "junit_tests_failed": 0,
-    "command": "java -cp <library-sp26 jars>;out;out-test org.junit.runner.JUnitCore core.gen.PrimMstInvariantsTest core.gen.DeterminismTest core.gen.WorldConnectivityTest",
-    "wall_clock_seconds_observed": 0.813,
-    "notes": "1000 seeds was reached for the connectivity sweep because generation for a 70x50 grid with 16 chunks is cheap (well under 1ms/seed); no seed count was reduced or approximated. Numbers above are copied from an actual JUnitCore run, not estimated."
-  }
+  "verification_status": "verified"
 }

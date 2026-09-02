@@ -4,6 +4,7 @@ import core.persistence.CommandHistory;
 import core.persistence.SaveGameRepository;
 import org.junit.Test;
 import tileengine.TETile;
+import verification.VerificationConfig;
 
 import java.util.Random;
 
@@ -15,12 +16,13 @@ import static org.junit.Assert.assertEquals;
  * entry point, and checks the two runs land in the same final state.
  */
 public class ReplayEquivalenceTest {
-    private static final int TRACE_COUNT = 40;
-    private static final int TRACE_LENGTH = 250;
+    private static final int TRACE_COUNT = VerificationConfig.REPLAY_TRACE_COUNT;
+    private static final int TRACE_LENGTH = VerificationConfig.REPLAY_TRACE_LENGTH;
     private static final char[] ALPHABET = {'w', 'a', 's', 'd', 'j', 'e'};
 
     private static World buildWorld(long seed) {
-        World world = new World(70, 50, 4, 4, seed);
+        World world = new World(VerificationConfig.WORLD_WIDTH, VerificationConfig.WORLD_HEIGHT,
+                VerificationConfig.CHUNK_ROWS, VerificationConfig.CHUNK_COLS, seed);
         world.placePlayer();
         world.placeEnemy();
         world.placeTrap();

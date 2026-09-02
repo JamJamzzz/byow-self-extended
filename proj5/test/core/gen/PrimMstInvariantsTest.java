@@ -1,6 +1,7 @@
 package core.gen;
 
 import org.junit.Test;
+import verification.VerificationConfig;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -17,15 +18,18 @@ import static org.junit.Assert.assertTrue;
 /**
  * Verifies the chunk graph + Prim MST invariants across a deterministic
  * seed set: N participating chunks yield exactly N-1 tree edges, every
- * chunk is reachable through tree edges alone, the tree is acyclic, and no
- * edge (tree or extra) is duplicated.
+ * chunk is reachable through tree edges alone, the tree is genuinely
+ * acyclic (checked with an independent Union-Find pass over the edge list,
+ * not just inferred from the edge count), and no edge (tree or extra) is
+ * duplicated. Independent verification that the tree is actually
+ * *minimum*-cost lives separately in {@link PrimIsMinimumSpanningTreeTest}.
  */
 public class PrimMstInvariantsTest {
-    private static final int SEED_COUNT = 500;
-    private static final int WIDTH = 70;
-    private static final int HEIGHT = 50;
-    private static final int CHUNK_ROWS = 4;
-    private static final int CHUNK_COLS = 4;
+    private static final int SEED_COUNT = VerificationConfig.PRIM_INVARIANTS_SEED_COUNT;
+    private static final int WIDTH = VerificationConfig.WORLD_WIDTH;
+    private static final int HEIGHT = VerificationConfig.WORLD_HEIGHT;
+    private static final int CHUNK_ROWS = VerificationConfig.CHUNK_ROWS;
+    private static final int CHUNK_COLS = VerificationConfig.CHUNK_COLS;
 
     @Test
     public void mstAndGraphInvariantsHoldAcrossManySeeds() {
@@ -37,7 +41,8 @@ public class PrimMstInvariantsTest {
             assertEquals("seed " + seed + ": MST edge count must be N-1", participating - 1, world.mstEdges().size());
 
             assertTrue("seed " + seed + ": MST must connect every chunk", allChunksConnected(world.chunks(), world.mstEdges()));
-            assertTrue("seed " + seed + ": MST must be acyclic", isForest(world.chunks(), world.mstEdges()));
+            assertTrue("seed " + seed + ": MST edge set must not contain a cycle",
+                    hasNoCycle(world.chunks(), world.mstEdges()));
 
             assertNoDuplicateEdges(seed, world.mstEdges(), world.extraEdges());
         }
@@ -66,9 +71,21 @@ public class PrimMstInvariantsTest {
         return visited.size() == chunks.size();
     }
 
-    /** A graph is a forest iff it has no cycle, which (given |E| = |V|-1 already checked) reduces to reachability. */
-    private boolean isForest(List<Chunk> chunks, List<ChunkEdge> mstEdges) {
-        return mstEdges.size() == chunks.size() - 1;
+    /**
+     * Independently confirms the MST edge set contains no cycle: union each
+     * edge's two endpoints, and if any edge's endpoints are already in the
+     * same component before that union, a cycle exists. This does not
+     * assume anything about edge count -- it is a real structural check,
+     * complementary to the separate N-1 edge-count assertion above.
+     */
+    private boolean hasNoCycle(List<Chunk> chunks, List<ChunkEdge> edges) {
+        DisjointSetUnion dsu = new DisjointSetUnion(chunks);
+        for (ChunkEdge edge : edges) {
+            if (!dsu.union(edge.a(), edge.b())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Map<Chunk, List<Chunk>> buildAdjacency(List<Chunk> chunks, List<ChunkEdge> edges) {

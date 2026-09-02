@@ -2,16 +2,17 @@ package core.gen;
 
 import org.junit.Test;
 import tileengine.TETile;
+import verification.VerificationConfig;
 
 import static org.junit.Assert.assertEquals;
 
 /** Same seed must produce byte-for-byte identical generated layouts. */
 public class DeterminismTest {
-    private static final int SEED_COUNT = 300;
-    private static final int WIDTH = 70;
-    private static final int HEIGHT = 50;
-    private static final int CHUNK_ROWS = 4;
-    private static final int CHUNK_COLS = 4;
+    private static final int SEED_COUNT = VerificationConfig.DETERMINISM_SEED_COUNT;
+    private static final int WIDTH = VerificationConfig.WORLD_WIDTH;
+    private static final int HEIGHT = VerificationConfig.WORLD_HEIGHT;
+    private static final int CHUNK_ROWS = VerificationConfig.CHUNK_ROWS;
+    private static final int CHUNK_COLS = VerificationConfig.CHUNK_COLS;
 
     @Test
     public void sameSeedProducesIdenticalGridAcrossManySeeds() {

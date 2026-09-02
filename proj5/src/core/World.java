@@ -4,13 +4,11 @@ import core.gen.ChunkedWorldGenerator;
 import core.gen.GeneratedWorld;
 import tileengine.TETile;
 import tileengine.Tileset;
-import utils.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Runtime game state: the rendered grid, the player, enemies/traps, item
@@ -26,12 +24,21 @@ public final class World {
     private final TETile[][] grid;
     private final List<Room> rooms;
     private final Room spawnRoom;
-    private final Random entityRandom;
+    private final DeterministicRng entityRandom;
 
     private final Player player = new Player();
     private List<Position> enemies = new ArrayList<>();
     private List<Position> traps = new ArrayList<>();
     private final Map<Position, Interactable> interactables = new HashMap<>();
+
+    /**
+     * Counts successful player moves. GameEngine owns the *policy* of what
+     * this counter means (the enemy/trap move intervals), but the counter
+     * itself lives here because it is checkpointable execution state, same
+     * as everything else in this class.
+     */
+    private int moveCount = 0;
+
     private Checkpoint checkpoint;
 
     public World(int width, int height, int chunkRows, int chunkCols, long seed) {
@@ -42,14 +49,23 @@ public final class World {
         this.seed = seed;
         this.rooms = generated.rooms();
         this.spawnRoom = generated.spawnRoom();
-        this.entityRandom = generated.entityRandom();
+        this.entityRandom = new DeterministicRng(generated.entitySeed());
+    }
+
+    public int getMoveCount() {
+        return moveCount;
+    }
+
+    /** Records one successful player move and returns the new count. */
+    public int incrementMoveCount() {
+        return ++moveCount;
     }
 
     public void placePlayer() {
         int spawnX = spawnRoom.centerAtX();
         int spawnY = spawnRoom.centerAtY();
         player.setPosition(new Position(spawnX, spawnY));
-        grid[spawnX][spawnY] = player.getAvator();
+        grid[spawnX][spawnY] = player.getAvatar();
     }
 
     public void placeEnemy() {
@@ -98,7 +114,7 @@ public final class World {
             if (room.width() <= 2 || room.height() <= 2) {
                 continue;
             }
-            if (RandomUtils.bernoulli(entityRandom, 0.5)) {
+            if (entityRandom.nextDouble() < 0.5) {
                 int x = entityRandom.nextInt(room.width() - 2) + room.x() + 1;
                 int y = entityRandom.nextInt(room.height() - 2) + room.y() + 1;
                 if (grid[x][y] == Tileset.FLOOR) {
@@ -304,7 +320,8 @@ public final class World {
 
     public void saveCheckpoint() {
         checkpoint = new Checkpoint(grid, enemies, traps, interactables, player.getPosition(),
-                player.getHealth(), player.getMoney(), player.getStandingOn());
+                player.getHealth(), player.getMoney(), player.getStandingOn(),
+                player.getDirection(), player.isInvincible(), moveCount, entityRandom.snapshotState());
     }
 
     public void saveCheckpointIfLeavingRoom(Position from, Position to) {
@@ -334,6 +351,11 @@ public final class World {
         player.setHealth(checkpoint.playerHealth());
         player.setMoney(checkpoint.playerMoney());
         player.setStandingOn(checkpoint.playerStandingOn());
+        player.setDirection(checkpoint.playerDirection());
+        player.setInvincible(checkpoint.playerInvincible());
+
+        moveCount = checkpoint.moveCount();
+        entityRandom.restoreState(checkpoint.rngState());
 
         return true;
     }
